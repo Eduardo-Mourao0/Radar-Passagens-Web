@@ -1,0 +1,52 @@
+.airport-input {
+  position: relative;
+}
+.suggestions {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 235px;
+  max-height: 205px;
+  overflow: auto;
+  background: #fff;
+  color: #0c1222;
+  border-radius: 8px;
+  box-shadow: 0 13px 28px #0005;
+}
+.suggestions.visible {
+  display: block;
+}
+.suggestion {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  padding: 10px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.suggestion:hover,
+.suggestion:focus {
+  background: #fff1ed;
+  outline: 0;
+}
+.suggestion span {
+  color: #687085;
+  font-size: 11px;
+}
+.suggestion code {
+  color: #f16544;
+  font:
+    500 11px 'DM Mono',
+    monospace;
+}
+@media (max-width: 430px) {
+  .suggestions {
+    width: 210px;
+  }
+}

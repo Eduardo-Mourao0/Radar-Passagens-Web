@@ -1,0 +1,149 @@
+import { createRouteCard } from '../components/routeCard.js';
+import { validateRoute } from '../utils/validators.js';
+
+export function createRoutesFeature({ elements, routesApi, onBooking, onHistory, onAlert }) {
+  const { form, formMessage, grid, count, apiStatus, checkPricesButton, deleteDialog, deleteForm } =
+    elements;
+  let pendingDeletion = null;
+
+  function setApiStatus(state, label) {
+    apiStatus.className = `api-status ${state}`;
+    apiStatus.querySelector('span').textContent = label;
+  }
+
+  function renderRoutes(routes) {
+    count.textContent = routes.length;
+    if (!routes.length) {
+      grid.innerHTML =
+        '<div class="empty-state"><span>\u2311</span><h3>Nenhuma rota ainda</h3><p>Cadastre uma rota para come\u00e7ar a acompanhar os pre\u00e7os.</p></div>';
+      return;
+    }
+    grid.innerHTML = routes.map(createRouteCard).join('');
+  }
+
+  async function loadRoutes() {
+    grid.innerHTML = '<div class="loading">Carregando suas rotas\u2026</div>';
+    try {
+      const routes = await routesApi.list();
+      const routesWithHistory = await Promise.all(
+        routes.map(async (route) => ({
+          ...route,
+          historicos: await routesApi.history(route.id).catch(() => []),
+        })),
+      );
+      setApiStatus('online', 'API conectada');
+      renderRoutes(routesWithHistory);
+    } catch {
+      setApiStatus('offline', 'API indispon\u00edvel');
+      grid.innerHTML =
+        '<div class="empty-state"><span>!</span><h3>N\u00e3o foi poss\u00edvel acessar a API</h3><p>Inicie o backend em <code>http://localhost:3000</code> e tente novamente.</p></div>';
+    }
+  }
+
+  async function handleRouteSubmit(event) {
+    event.preventDefault();
+    formMessage.textContent = '';
+    const origin = form.elements.origem.dataset.iata;
+    const destination = form.elements.destino.dataset.iata;
+    const data = Object.fromEntries(new FormData(form));
+    const validationError = validateRoute({
+      origin,
+      destination,
+      departureDate: data.dataIda,
+      returnDate: data.dataVolta,
+    });
+    if (validationError) {
+      formMessage.textContent = validationError;
+      return;
+    }
+
+    const submitButton = form.querySelector('.primary-button');
+    const route = { ...data, origem: origin, destino: destination };
+    if (!route.dataVolta) delete route.dataVolta;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Salvando\u2026';
+    try {
+      await routesApi.create(route);
+      form.reset();
+      delete form.elements.origem.dataset.iata;
+      delete form.elements.destino.dataset.iata;
+      formMessage.textContent = 'Rota cadastrada e monitorada!';
+      await loadRoutes();
+    } catch (error) {
+      formMessage.textContent = error.message;
+    } finally {
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Monitorar rota <span>\u2192</span>';
+    }
+  }
+
+  async function handleRouteAction(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const { action, id } = button.dataset;
+
+    if (action === 'booking') return onBooking(id);
+    if (action === 'history') return onHistory(id);
+    if (action === 'alert') return onAlert(id, button.dataset.route);
+    if (action === 'delete') {
+      pendingDeletion = { id, button };
+      deleteDialog.showModal();
+      return;
+    }
+
+    button.disabled = true;
+    try {
+      await (button.dataset.active === 'true' ? routesApi.pause(id) : routesApi.activate(id));
+      await loadRoutes();
+    } catch (error) {
+      window.alert(error.message);
+      button.disabled = false;
+    }
+  }
+
+  async function handleDeleteSubmit(event) {
+    if (!event.submitter?.matches('[data-confirm-delete]') || !pendingDeletion) return;
+    event.preventDefault();
+    const { id, button } = pendingDeletion;
+    button.disabled = true;
+    button.textContent = 'Excluindo\u2026';
+    try {
+      await routesApi.delete(id);
+      deleteDialog.close();
+      await loadRoutes();
+    } catch (error) {
+      window.alert(error.message);
+      button.disabled = false;
+      button.textContent = 'Excluir';
+    } finally {
+      pendingDeletion = null;
+    }
+  }
+
+  async function handlePriceRefresh(event) {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = 'Atualizando\u2026';
+    try {
+      await routesApi.refreshPrices();
+      await loadRoutes();
+    } catch (error) {
+      window.alert(error.message);
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Atualizar pre\u00e7os \u21bb';
+    }
+  }
+
+  function setup() {
+    form.addEventListener('submit', handleRouteSubmit);
+    grid.addEventListener('click', handleRouteAction);
+    deleteForm.addEventListener('submit', handleDeleteSubmit);
+    deleteDialog.addEventListener('close', () => {
+      pendingDeletion = null;
+    });
+    checkPricesButton.addEventListener('click', handlePriceRefresh);
+  }
+
+  return { loadRoutes, setup };
+}
