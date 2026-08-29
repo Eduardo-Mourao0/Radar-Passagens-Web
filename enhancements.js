@@ -1,10 +1,9 @@
 (() => {
   let pendingDeletion = null;
-  let updateScheduled = false;
   const deleteDialog = document.querySelector('#delete-dialog');
   const deleteForm = document.querySelector('#delete-form');
 
-  const addDeleteButtons = () => document.querySelectorAll('.card-actions').forEach((actions) => {
+  const addDeleteButton = (actions) => {
     if (actions.querySelector('.delete-button')) return;
     const routeId = actions.querySelector('[data-id]')?.dataset.id;
     if (!routeId) return;
@@ -17,7 +16,9 @@
       deleteDialog.showModal();
     });
     actions.append(button);
-  });
+  };
+
+  const addDeleteButtons = (container = document) => container.querySelectorAll('.card-actions').forEach(addDeleteButton);
   deleteForm.addEventListener('submit', async (event) => {
     if (!event.submitter?.matches('[data-confirm-delete]') || !pendingDeletion) return;
     event.preventDefault();
@@ -35,13 +36,10 @@
     } finally { pendingDeletion = null; }
   });
   deleteDialog.addEventListener('close', () => { pendingDeletion = null; });
-  new MutationObserver(() => {
-    if (updateScheduled) return;
-    updateScheduled = true;
-    requestAnimationFrame(() => {
-      updateScheduled = false;
-      addDeleteButtons();
-    });
-  }).observe(document.querySelector('#routes-grid'), { childList: true });
+  new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
+    if (!(node instanceof Element)) return;
+    if (node.matches('.card-actions')) addDeleteButton(node);
+    addDeleteButtons(node);
+  }))).observe(document.querySelector('#routes-grid'), { childList: true });
   addDeleteButtons();
 })();

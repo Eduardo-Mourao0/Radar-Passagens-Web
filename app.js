@@ -30,7 +30,7 @@ async function request(path, options = {}) {
     try {
       body = JSON.parse(responseText);
     } catch (error) {
-      console.error('A API retornou uma resposta JSON inv\u00e1lida.', error);
+      console.error('A API retornou uma resposta JSON inv\u00e1lida.', { path, status: response.status, error });
       throw new Error('A API retornou uma resposta inv\u00e1lida. Tente novamente mais tarde.');
     }
   }
@@ -83,7 +83,7 @@ function renderRoutes(routes) {
     const dates = `${formatDate(route.dataIda)}${route.dataVolta ? ` \u2014 ${formatDate(route.dataVolta)}` : ' \u00b7 somente ida'}`;
     const fare = price ? money(price.preco, price.moeda) : 'Aguardando coleta';
     const alertLabel = route.alertaPreco ? `\u25cf Alerta: at\u00e9 ${money(route.alertaPreco.precoAlvo)}` : '\u25cb Sem alerta configurado';
-    return `<article class="route-card ${route.ativa ? '' : 'inactive'}"><div class="card-top"><div class="route-code">${route.origem}<span>\u2192</span>${route.destino}</div><span class="badge">${route.ativa ? 'ATIVA' : 'PAUSADA'}</span></div><p class="dates">${dates}</p><div class="price-line"><div><div class="price-label">\u00daLTIMA TARIFA</div><div class="price ${price ? '' : 'empty'}">${fare}</div></div>${price ? `<span class="price-label">${price.companhia}</span>` : ''}</div><p class="alert-status ${route.alertaPreco ? 'configured' : ''}" aria-label="${alertLabel}">${alertLabel}</p><div class="card-actions"><button data-action="history" data-id="${route.id}">Hist\u00f3rico</button><button data-action="alert" data-id="${route.id}" data-route="${route.origem} \u2192 ${route.destino}">Alerta</button><button data-action="booking" data-id="${route.id}">Ver passagem</button><button data-action="toggle" data-id="${route.id}" data-active="${route.ativa}">${route.ativa ? 'Pausar' : 'Reativar'}</button></div></article>`;
+    return `<article class="route-card ${route.ativa ? '' : 'inactive'}"><div class="card-top"><div class="route-code">${route.origem}<span>\u2192</span>${route.destino}</div><span class="badge">${route.ativa ? 'ATIVA' : 'PAUSADA'}</span></div><p class="dates">${dates}</p><div class="price-line"><div><div class="price-label">\u00daLTIMA TARIFA</div><div class="price ${price ? '' : 'empty'}">${fare}</div></div>${price ? `<span class="price-label">${price.companhia}</span>` : ''}</div><p class="alert-status ${route.alertaPreco ? 'configured' : ''}">${alertLabel}</p><div class="card-actions"><button data-action="history" data-id="${route.id}">Hist\u00f3rico</button><button data-action="alert" data-id="${route.id}" data-route="${route.origem} \u2192 ${route.destino}">Alerta</button><button data-action="booking" data-id="${route.id}">Ver passagem</button><button data-action="toggle" data-id="${route.id}" data-active="${route.ativa}">${route.ativa ? 'Pausar' : 'Reativar'}</button></div></article>`;
   }).join('');
 }
 
@@ -107,8 +107,11 @@ async function showBookingLinks(id) {
   content.innerHTML = `<p class="loading">${text.bookingLoading}</p>`;
   try {
     const links = await request(`/rotas/${id}/links-compra`);
-    const options = links.map((link) => ({ ...link, url: safeBookingUrl(link.url) })).filter((link) => link.url);
-    content.innerHTML = options.length ? `<div class="history-list">${options.map((link) => `<div class="history-row"><div><strong>${link.fornecedor}</strong><p>${link.tipoFornecedor === 'airline' ? 'Companhia a\u00e9rea' : 'Ag\u00eancia parceira'}</p></div><a class="booking-link" href="${link.url}" target="_blank" rel="noopener noreferrer">Abrir \u2197</a></div>`).join('')}</div>` : '<p class="history-empty">Nenhum link de compra est\u00e1 dispon\u00edvel.</p>';
+    const options = links.map((link) => ({ ...link, url: safeBookingUrl(link.url) }));
+    const invalidLinkCount = options.filter((link) => !link.url).length;
+    if (invalidLinkCount) console.warn(`${invalidLinkCount} link(s) de compra foram ocultados por URL inv\u00e1lida.`);
+    const validOptions = options.filter((link) => link.url);
+    content.innerHTML = validOptions.length ? `<div class="history-list">${validOptions.map((link) => `<div class="history-row"><div><strong>${link.fornecedor}</strong><p>${link.tipoFornecedor === 'airline' ? 'Companhia a\u00e9rea' : 'Ag\u00eancia parceira'}</p></div><a class="booking-link" href="${link.url}" target="_blank" rel="noopener noreferrer">Abrir \u2197</a></div>`).join('')}</div>` : '<p class="history-empty">Nenhum link de compra est\u00e1 dispon\u00edvel.</p>';
   } catch (error) { content.innerHTML = `<p class="history-empty">${error.message}</p>`; }
 }
 
@@ -135,6 +138,7 @@ function showAlert(id, route) {
 
 document.querySelector('#route-form').addEventListener('submit', async (event) => {
   event.preventDefault();
+  message.textContent = '';
   const form = event.currentTarget;
   const origem = form.elements.origem.dataset.iata;
   const destino = form.elements.destino.dataset.iata;
