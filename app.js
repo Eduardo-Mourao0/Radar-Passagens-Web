@@ -1,5 +1,4 @@
 const airports = window.BRAZILIAN_AIRPORTS ?? [];
-if (!airports.length) console.warn('Cat\u00e1logo de aeroportos indispon\u00edvel.');
 const grid = document.querySelector('#routes-grid');
 const count = document.querySelector('#route-count');
 const message = document.querySelector('#form-message');
@@ -35,7 +34,7 @@ function setApiStatus(state, label) {
 
 function safeBookingUrl(value) {
   try {
-    const url = new URL(value, 'https://example.com');
+    const url = new URL(value);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
   } catch { return null; }
 }
@@ -45,7 +44,7 @@ function setupAirportSearch(name, listSelector) {
   const list = document.querySelector(listSelector);
   const render = () => {
     const term = normalise(input.value.trim());
-    const matches = term ? airports.filter((airport) => normalise(airport[0]).includes(term) || normalise(airport[2]).includes(term)).slice(0, 8) : [];
+    const matches = term ? airports.filter((airport) => normalise(airport[0]).includes(term) || normalise(airport[1]).includes(term) || normalise(airport[2]).includes(term)).slice(0, 8) : [];
     list.innerHTML = matches.map((airport, index) => `<button class="suggestion" type="button" data-index="${index}"><span>${airport[0]}, ${airport[1]}</span><code>${airport[2]}</code></button>`).join('');
     list.classList.toggle('visible', matches.length > 0);
     list.querySelectorAll('button').forEach((button) => button.addEventListener('mousedown', (event) => {
@@ -184,7 +183,14 @@ document.querySelector('#check-prices').addEventListener('click', async (event) 
     button.textContent = 'Atualizar pre\u00e7os \u21bb';
   }
 });
-setupAirportSearch('origem', '#origin-suggestions');
-setupAirportSearch('destino', '#destination-suggestions');
+if (airports.length) {
+  setupAirportSearch('origem', '#origin-suggestions');
+  setupAirportSearch('destino', '#destination-suggestions');
+} else {
+  console.warn('Cat\u00e1logo de aeroportos indispon\u00edvel.');
+  document.querySelectorAll('[name="origem"], [name="destino"]').forEach((input) => { input.disabled = true; });
+  document.querySelector('#route-form .primary-button').disabled = true;
+  message.textContent = 'O cat\u00e1logo de aeroportos n\u00e3o foi carregado. Recarregue a p\u00e1gina para tentar novamente.';
+}
 loadRoutes();
 window.addEventListener('routes:reload', loadRoutes);
