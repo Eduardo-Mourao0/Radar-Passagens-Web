@@ -1,0 +1,5 @@
+{
+  "name": "radar-passagens-web",
+  "private": true,
+  "scripts": { "start": "node server.js" }
+}
