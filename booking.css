@@ -1,0 +1,7 @@
+.booking-link { align-self: center; color: #f16544; font-size: 13px; font-weight: 700; text-decoration: none; }
+.booking-link:hover { text-decoration: underline; }
+.delete-button { color: #c74839 !important; }
+.alert-status { margin: 14px 0 -4px; color: #687085; font-size: 12px; }
+.alert-status.configured { color: #2b9b76; font-weight: 700; }
+.delete-confirm-button { border: 0; border-radius: 8px; padding: 12px 15px; background: #c74839; color: #fff; font-weight: 700; }
+.delete-confirm-button:hover { background: #a7352a; }
