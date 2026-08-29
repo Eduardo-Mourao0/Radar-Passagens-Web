@@ -24,6 +24,17 @@ src/
 
 O Vite encaminha chamadas de `/api` para `http://localhost:3000`, sem necessidade de CORS no backend.
 
+## Deploy
+
+O frontend é estático e pode ser publicado na Vercel, Netlify ou Render Static Site.
+
+1. Publique primeiro o backend em um serviço que forneça uma URL HTTPS.
+2. Configure o CORS do backend para permitir o domínio do frontend.
+3. Na plataforma do frontend, defina a variável `VITE_API_BASE_URL` com a URL pública do backend, sem barra final.
+4. Use `npm run build` como comando de build e `dist` como diretório de publicação.
+
+Sem `VITE_API_BASE_URL`, a aplicação usa `/api`, que é apropriado para desenvolvimento com o proxy do Vite. Copie `.env.example` para `.env.local` se quiser testar localmente contra um backend hospedado.
+
 ## Comandos
 
 | Comando                    | Descrição                                      |
