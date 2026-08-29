@@ -16,4 +16,7 @@ export const airports = [
   ...asiaAirports,
   ...oceaniaAirports,
   ...antarcticaAirports,
-];
+].sort(
+  (first, second) =>
+    first[0].localeCompare(second[0], 'pt-BR') || first[2].localeCompare(second[2]),
+);

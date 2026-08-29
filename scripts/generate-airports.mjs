@@ -53,6 +53,8 @@ const [headers, ...rows] = parseCsv(csv);
 const column = Object.fromEntries(headers.map((header, index) => [header, index]));
 const airportsByRegion = Object.fromEntries(Object.keys(REGIONS).map((region) => [region, []]));
 const iataCodes = new Set();
+let skippedMissingCity = 0;
+let skippedDuplicateIata = 0;
 
 for (const row of rows) {
   const continent = row[column.continent];
@@ -62,10 +64,17 @@ for (const row of rows) {
   const region = REGIONS[continent];
 
   if (!region || country === 'BR' || !['large_airport', 'medium_airport'].includes(type)) continue;
-  if (!/^[A-Z]{3}$/.test(iata) || iataCodes.has(iata)) continue;
+  if (!/^[A-Z]{3}$/.test(iata)) continue;
+  if (iataCodes.has(iata)) {
+    skippedDuplicateIata += 1;
+    continue;
+  }
 
   const city = row[column.municipality] || row[column.name];
-  if (!city) continue;
+  if (!city) {
+    skippedMissingCity += 1;
+    continue;
+  }
 
   iataCodes.add(iata);
   airportsByRegion[continent].push([city, country, iata]);
@@ -79,4 +88,9 @@ await Promise.all(
     const output = `// Fonte: OurAirports (domínio público), filtrado para aeroportos médios e grandes com IATA.\nexport const ${exportName} = ${JSON.stringify(airports, null, 2)};\n`;
     await writeFile(resolve('src/js/data', `${file}.js`), output);
   }),
+);
+
+console.log(`Catálogo gerado: ${iataCodes.size} aeroportos importados.`);
+console.log(
+  `Descartados: ${skippedMissingCity} sem cidade e ${skippedDuplicateIata} IATA duplicados.`,
 );
