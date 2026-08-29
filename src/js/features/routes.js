@@ -5,6 +5,7 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
   const { form, formMessage, grid, count, apiStatus, checkPricesButton, deleteDialog, deleteForm } =
     elements;
   let pendingDeletion = null;
+  const errorMessage = (error, fallback) => error?.message || fallback;
 
   function setApiStatus(state, label) {
     apiStatus.className = `api-status ${state}`;
@@ -96,7 +97,7 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       await (button.dataset.active === 'true' ? routesApi.pause(id) : routesApi.activate(id));
       await loadRoutes();
     } catch (error) {
-      window.alert(error.message);
+      window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel concluir esta a\u00e7\u00e3o.'));
       button.disabled = false;
     }
   }
@@ -112,7 +113,7 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       deleteDialog.close();
       await loadRoutes();
     } catch (error) {
-      window.alert(error.message);
+      window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel excluir a rota.'));
       button.disabled = false;
       button.textContent = 'Excluir';
     } finally {
@@ -128,7 +129,7 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       await routesApi.refreshPrices();
       await loadRoutes();
     } catch (error) {
-      window.alert(error.message);
+      window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel atualizar os pre\u00e7os.'));
     } finally {
       button.disabled = false;
       button.textContent = 'Atualizar pre\u00e7os \u21bb';

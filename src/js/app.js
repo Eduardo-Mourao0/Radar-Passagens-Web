@@ -18,7 +18,7 @@ const elements = {
 };
 
 function setupAirportSearch() {
-  if (!airports.length) {
+  if (!Array.isArray(airports) || !airports.length) {
     console.warn('Cat\u00e1logo de aeroportos indispon\u00edvel.');
     document.querySelectorAll('[name="origem"], [name="destino"]').forEach((input) => {
       input.disabled = true;
