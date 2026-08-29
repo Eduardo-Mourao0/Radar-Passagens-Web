@@ -10,7 +10,7 @@ src/
   js/
     api/               Cliente HTTP e operações de rotas
     components/        Autocomplete e card de rota
-    data/              Catálogo de aeroportos brasileiros
+    data/              Catálogos por região e agregação de aeroportos
     features/          Fluxos de rotas, alertas, histórico e reservas
     utils/             Formatadores, validações e escape de HTML
     app.js             Inicializa e conecta os módulos
@@ -37,12 +37,23 @@ Sem `VITE_API_BASE_URL`, a aplicação usa `/api`, que é apropriado para desenv
 
 ## Comandos
 
-| Comando                    | Descrição                                      |
-| -------------------------- | ---------------------------------------------- |
-| `npm.cmd run dev`          | Inicia o ambiente de desenvolvimento com Vite. |
-| `npm.cmd run build`        | Gera a versão estática em `dist/`.             |
-| `npm.cmd run preview`      | Serve localmente o build gerado.               |
-| `npm.cmd run lint`         | Verifica erros comuns de JavaScript.           |
-| `npm.cmd run format:check` | Verifica a formatação com Prettier.            |
-| `npm.cmd run format`       | Formata os arquivos do projeto.                |
-| `npm.cmd start`            | Mantém o servidor legado com proxy para a API. |
+| Comando                                          | Descrição                                                   |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| `npm.cmd run dev`                                | Inicia o ambiente de desenvolvimento com Vite.              |
+| `npm.cmd run build`                              | Gera a versão estática em `dist/`.                          |
+| `npm.cmd run preview`                            | Serve localmente o build gerado.                            |
+| `npm.cmd run lint`                               | Verifica erros comuns de JavaScript.                        |
+| `npm.cmd run format:check`                       | Verifica a formatação com Prettier.                         |
+| `npm.cmd run format`                             | Formata os arquivos do projeto.                             |
+| `npm.cmd run generate:airports -- <arquivo.csv>` | Gera os catálogos regionais a partir do CSV do OurAirports. |
+| `npm.cmd start`                                  | Mantém o servidor legado com proxy para a API.              |
+
+## Catálogo de aeroportos
+
+O catálogo preserva os aeroportos brasileiros em `src/js/data/brazil.js` e separa os demais aeroportos comerciais por continente: América do Sul, América do Norte, Europa, África, Ásia, Oceania e Antártida. O módulo `src/js/data/airports.js` os agrega para o autocomplete.
+
+Os aeroportos internacionais são gerados a partir do dataset público do [OurAirports](https://ourairports.com/data/), filtrando registros `medium_airport` e `large_airport` com código IATA de três letras. Para atualizar o catálogo, baixe o arquivo `airports.csv` da fonte e execute:
+
+```powershell
+npm.cmd run generate:airports -- C:\caminho\para\airports.csv
+```
