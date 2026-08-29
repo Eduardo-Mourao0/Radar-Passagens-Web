@@ -24,5 +24,11 @@ export const airports = [
 const airportCitiesByIata = new Map(airports.map(([city, , iata]) => [iata, city]));
 
 export function getAirportCity(iata) {
-  return airportCitiesByIata.get(iata) ?? iata;
+  const city = airportCitiesByIata.get(iata);
+
+  if (!city && import.meta.env?.DEV) {
+    console.warn(`Cidade não encontrada para o aeroporto ${iata}.`);
+  }
+
+  return city ?? null;
 }
