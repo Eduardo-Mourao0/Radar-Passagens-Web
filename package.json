@@ -7,6 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "generate:airports": "node scripts/generate-airports.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
