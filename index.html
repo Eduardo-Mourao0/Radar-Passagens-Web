@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="autocomplete.css" />
+    <link rel="stylesheet" href="booking.css" />
   </head>
   <body>
     <main class="shell">
@@ -14,13 +15,17 @@
       <section class="hero"><p class="eyebrow">MONITORAMENTO INTELIGENTE</p><h1>Boas oportunidades<br /><em>não esperam.</em></h1><p>Acompanhe suas rotas, encontre a melhor tarifa e receba alertas quando o preço ideal aparecer.</p></section>
       <section class="dashboard">
         <aside class="create-card"><p class="eyebrow">NOVA BUSCA</p><h2>Para onde vamos?</h2>
-          <form id="route-form"><div class="field-row"><label>Origem<div class="airport-input"><input name="origem" placeholder="Digite uma cidade" required autocomplete="off" /><div class="suggestions" id="origin-suggestions"></div></div></label><b>→</b><label>Destino<div class="airport-input"><input name="destino" placeholder="Digite uma cidade" required autocomplete="off" /><div class="suggestions" id="destination-suggestions"></div></div></label></div><label>Data de ida<input id="data-ida" name="dataIda" type="date" required /></label><label>Data de volta <small>opcional</small><input name="dataVolta" type="date" /></label><button class="primary-button">Monitorar rota <span>→</span></button></form><p class="form-message" id="form-message"></p>
+          <form id="route-form"><div class="field-row"><label>Origem<div class="airport-input"><input name="origem" placeholder="Digite uma cidade" required autocomplete="off" /><div class="suggestions" id="origin-suggestions"></div></div></label><b>→</b><label>Destino<div class="airport-input"><input name="destino" placeholder="Digite uma cidade" required autocomplete="off" /><div class="suggestions" id="destination-suggestions"></div></div></label></div><label>Data de ida<input id="data-ida" name="dataIda" type="date" required /></label><label>Data de volta <small>opcional</small><input name="dataVolta" type="date" /></label><button class="primary-button">Monitorar rota <span>→</span></button></form><p class="form-message" id="form-message" aria-live="polite"></p>
         </aside>
         <section class="routes-area"><div class="routes-toolbar"><div><p class="eyebrow">SUAS ROTAS</p><h2>Rotas monitoradas <span id="route-count">0</span></h2></div><button id="check-prices" class="text-button">Atualizar preços ↻</button></div><div class="routes-grid" id="routes-grid"></div></section>
       </section>
     </main>
     <dialog id="history-dialog"><div class="dialog-header"><div><p class="eyebrow">HISTÓRICO DE PREÇOS</p><h2>Evolução das tarifas</h2></div><button class="close-button">×</button></div><div id="history-content"></div></dialog>
+    <dialog id="booking-dialog"><div class="dialog-header"><div><p class="eyebrow">COMPRAR PASSAGEM</p><h2>Opções de reserva</h2></div><button class="close-button">×</button></div><div id="booking-content"></div></dialog>
+    <dialog id="delete-dialog"><form method="dialog" id="delete-form"><p class="eyebrow">EXCLUIR ROTA</p><h2>Tem certeza?</h2><p class="dialog-copy">Esta ação remove permanentemente a rota, seu histórico de preços e todos os alertas cadastrados.</p><div class="dialog-actions"><button class="secondary-button" value="cancel">Cancelar</button><button class="delete-confirm-button" data-confirm-delete>Excluir rota</button></div></form></dialog>
     <dialog id="alert-dialog"><form method="dialog" id="alert-form"><button class="close-button" value="cancel">×</button><p class="eyebrow">ALERTA DE PREÇO</p><h2 id="alert-title">Definir sua meta</h2><p class="dialog-copy">Receba um aviso no Telegram quando a tarifa atingir este valor ou menos.</p><label>Preço máximo (R$)<input id="target-price" inputmode="decimal" placeholder="1500,00" required /></label><div class="dialog-actions"><button value="cancel" class="secondary-button">Cancelar</button><button class="primary-button">Salvar alerta</button></div><p class="form-message" id="alert-message"></p></form></dialog>
+    <script src="airport-catalog.js"></script>
     <script src="app.js"></script>
+    <script src="enhancements.js"></script>
   </body>
 </html>
