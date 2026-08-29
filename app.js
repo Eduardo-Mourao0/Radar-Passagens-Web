@@ -22,7 +22,19 @@ document.querySelector('#data-ida').min = new Date().toISOString().slice(0, 10);
 
 async function request(path, options = {}) {
   const response = await fetch(`/api${path}`, { headers: { 'Content-Type': 'application/json', ...options.headers }, ...options });
-  const body = response.status === 204 ? null : await response.json().catch(() => null);
+  if (response.status === 204) return null;
+
+  const responseText = await response.text();
+  let body = null;
+  if (responseText) {
+    try {
+      body = JSON.parse(responseText);
+    } catch (error) {
+      console.error('A API retornou uma resposta JSON inv\u00e1lida.', error);
+      throw new Error('A API retornou uma resposta inv\u00e1lida. Tente novamente mais tarde.');
+    }
+  }
+
   if (!response.ok) throw new Error(body?.message || text.actionError);
   return body;
 }

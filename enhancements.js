@@ -25,12 +25,7 @@
     button.disabled = true;
     button.textContent = 'Excluindo\u2026';
     try {
-      const response = await fetch(`/api/rotas/${routeId}`, { method: 'DELETE' });
-      const body = await response.json().catch((error) => {
-        console.error('A API retornou uma resposta inv\u00e1lida ao excluir a rota.', error);
-        return null;
-      });
-      if (!response.ok) throw new Error(body?.message || 'N\u00e3o foi poss\u00edvel excluir a rota.');
+      await request(`/rotas/${routeId}`, { method: 'DELETE' });
       deleteDialog.close();
       window.dispatchEvent(new Event('routes:reload'));
     } catch (error) {
