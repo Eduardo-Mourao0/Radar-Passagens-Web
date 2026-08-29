@@ -224,11 +224,28 @@ button {
   align-items: flex-start;
 }
 .route-code {
+  display: flex;
+  align-items: flex-end;
   font-size: 25px;
   font-weight: 700;
   letter-spacing: -0.07em;
 }
-.route-code span {
+.route-airport {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.route-city {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+.route-iata {
+  line-height: 1;
+}
+.route-arrow {
   color: var(--accent);
   padding: 0 7px;
   font-weight: 400;
