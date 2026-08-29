@@ -1,4 +1,5 @@
 const airports = window.BRAZILIAN_AIRPORTS ?? [];
+if (!airports.length) console.warn('Cat\u00e1logo de aeroportos indispon\u00edvel.');
 const grid = document.querySelector('#routes-grid');
 const count = document.querySelector('#route-count');
 const message = document.querySelector('#form-message');
@@ -32,12 +33,19 @@ function setApiStatus(state, label) {
   apiStatus.querySelector('span').textContent = label;
 }
 
+function safeBookingUrl(value) {
+  try {
+    const url = new URL(value, 'https://example.com');
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch { return null; }
+}
+
 function setupAirportSearch(name, listSelector) {
   const input = document.querySelector(`[name="${name}"]`);
   const list = document.querySelector(listSelector);
   const render = () => {
     const term = normalise(input.value.trim());
-    const matches = term ? airports.filter((airport) => airport.some((value) => normalise(value).includes(term))).slice(0, 8) : [];
+    const matches = term ? airports.filter((airport) => normalise(airport[0]).includes(term) || normalise(airport[2]).includes(term)).slice(0, 8) : [];
     list.innerHTML = matches.map((airport, index) => `<button class="suggestion" type="button" data-index="${index}"><span>${airport[0]}, ${airport[1]}</span><code>${airport[2]}</code></button>`).join('');
     list.classList.toggle('visible', matches.length > 0);
     list.querySelectorAll('button').forEach((button) => button.addEventListener('mousedown', (event) => {
@@ -63,8 +71,8 @@ function renderRoutes(routes) {
     const price = route.historicos?.[0];
     const dates = `${formatDate(route.dataIda)}${route.dataVolta ? ` \u2014 ${formatDate(route.dataVolta)}` : ' \u00b7 somente ida'}`;
     const fare = price ? money(price.preco, price.moeda) : 'Aguardando coleta';
-    const alertLabel = route.alertaPreco ? `Alerta: at\u00e9 ${money(route.alertaPreco.precoAlvo)}` : 'Sem alerta configurado';
-    return `<article class="route-card ${route.ativa ? '' : 'inactive'}"><div class="card-top"><div class="route-code">${route.origem}<span>\u2192</span>${route.destino}</div><span class="badge">${route.ativa ? 'ATIVA' : 'PAUSADA'}</span></div><p class="dates">${dates}</p><div class="price-line"><div><div class="price-label">\u00daLTIMA TARIFA</div><div class="price ${price ? '' : 'empty'}">${fare}</div></div>${price ? `<span class="price-label">${price.companhia}</span>` : ''}</div><p class="alert-status ${route.alertaPreco ? 'configured' : ''}">${alertLabel}</p><div class="card-actions"><button data-action="history" data-id="${route.id}">Hist\u00f3rico</button><button data-action="alert" data-id="${route.id}" data-route="${route.origem} \u2192 ${route.destino}">Alerta</button><button data-action="booking" data-id="${route.id}">Ver passagem</button><button data-action="toggle" data-id="${route.id}" data-active="${route.ativa}">${route.ativa ? 'Pausar' : 'Reativar'}</button></div></article>`;
+    const alertLabel = route.alertaPreco ? `\u25cf Alerta: at\u00e9 ${money(route.alertaPreco.precoAlvo)}` : '\u25cb Sem alerta configurado';
+    return `<article class="route-card ${route.ativa ? '' : 'inactive'}"><div class="card-top"><div class="route-code">${route.origem}<span>\u2192</span>${route.destino}</div><span class="badge">${route.ativa ? 'ATIVA' : 'PAUSADA'}</span></div><p class="dates">${dates}</p><div class="price-line"><div><div class="price-label">\u00daLTIMA TARIFA</div><div class="price ${price ? '' : 'empty'}">${fare}</div></div>${price ? `<span class="price-label">${price.companhia}</span>` : ''}</div><p class="alert-status ${route.alertaPreco ? 'configured' : ''}" aria-label="${alertLabel}">${alertLabel}</p><div class="card-actions"><button data-action="history" data-id="${route.id}">Hist\u00f3rico</button><button data-action="alert" data-id="${route.id}" data-route="${route.origem} \u2192 ${route.destino}">Alerta</button><button data-action="booking" data-id="${route.id}">Ver passagem</button><button data-action="toggle" data-id="${route.id}" data-active="${route.ativa}">${route.ativa ? 'Pausar' : 'Reativar'}</button></div></article>`;
   }).join('');
 }
 
@@ -88,7 +96,8 @@ async function showBookingLinks(id) {
   content.innerHTML = `<p class="loading">${text.bookingLoading}</p>`;
   try {
     const links = await request(`/rotas/${id}/links-compra`);
-    content.innerHTML = links.length ? `<div class="history-list">${links.map((link) => { const url = link.url.startsWith('http') ? link.url : `https://${link.url}`; return `<div class="history-row"><div><strong>${link.fornecedor}</strong><p>${link.tipoFornecedor === 'airline' ? 'Companhia a\u00e9rea' : 'Ag\u00eancia parceira'}</p></div><a class="booking-link" href="${url}" target="_blank" rel="noopener noreferrer">Abrir \u2197</a></div>`; }).join('')}</div>` : '<p class="history-empty">Nenhum link de compra est\u00e1 dispon\u00edvel.</p>';
+    const options = links.map((link) => ({ ...link, url: safeBookingUrl(link.url) })).filter((link) => link.url);
+    content.innerHTML = options.length ? `<div class="history-list">${options.map((link) => `<div class="history-row"><div><strong>${link.fornecedor}</strong><p>${link.tipoFornecedor === 'airline' ? 'Companhia a\u00e9rea' : 'Ag\u00eancia parceira'}</p></div><a class="booking-link" href="${link.url}" target="_blank" rel="noopener noreferrer">Abrir \u2197</a></div>`).join('')}</div>` : '<p class="history-empty">Nenhum link de compra est\u00e1 dispon\u00edvel.</p>';
   } catch (error) { content.innerHTML = `<p class="history-empty">${error.message}</p>`; }
 }
 
@@ -119,11 +128,17 @@ document.querySelector('#route-form').addEventListener('submit', async (event) =
   const origem = form.elements.origem.dataset.iata;
   const destino = form.elements.destino.dataset.iata;
   if (!origem || !destino) { message.textContent = 'Escolha uma cidade nas sugest\u00f5es para origem e destino.'; return; }
+  if (origem === destino) { message.textContent = 'Origem e destino devem ser diferentes.'; return; }
   const body = Object.fromEntries(new FormData(form));
   body.origem = origem; body.destino = destino;
   if (!body.dataVolta) delete body.dataVolta;
+  if (body.dataVolta && body.dataVolta < body.dataIda) { message.textContent = 'A data de volta n\u00e3o pode ser anterior \u00e0 ida.'; return; }
+  const submitButton = form.querySelector('.primary-button');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Salvando\u2026';
   try { await request('/rotas', { method: 'POST', body: JSON.stringify(body) }); form.reset(); message.textContent = 'Rota cadastrada e monitorada!'; await loadRoutes(); }
   catch (error) { message.textContent = error.message; }
+  finally { submitButton.disabled = false; submitButton.innerHTML = 'Monitorar rota <span>\u2192</span>'; }
 });
 
 grid.addEventListener('click', async (event) => {
@@ -133,8 +148,14 @@ grid.addEventListener('click', async (event) => {
   if (action === 'booking') return showBookingLinks(id);
   if (action === 'history') return showHistory(id);
   if (action === 'alert') return showAlert(id, button.dataset.route);
-  await request(`/rotas/${id}/${button.dataset.active === 'true' ? 'desativar' : 'reativar'}`, { method: 'PATCH' });
-  await loadRoutes();
+  button.disabled = true;
+  try {
+    await request(`/rotas/${id}/${button.dataset.active === 'true' ? 'desativar' : 'reativar'}`, { method: 'PATCH' });
+    await loadRoutes();
+  } catch (error) {
+    window.alert(error.message);
+    button.disabled = false;
+  }
 });
 
 document.querySelectorAll('.close-button').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
@@ -166,3 +187,4 @@ document.querySelector('#check-prices').addEventListener('click', async (event) 
 setupAirportSearch('origem', '#origin-suggestions');
 setupAirportSearch('destino', '#destination-suggestions');
 loadRoutes();
+window.addEventListener('routes:reload', loadRoutes);
