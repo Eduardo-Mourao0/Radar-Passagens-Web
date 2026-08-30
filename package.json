@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node --test",
     "lint": "eslint .",
     "generate:airports": "node scripts/generate-airports.mjs",
     "format": "prettier --write .",

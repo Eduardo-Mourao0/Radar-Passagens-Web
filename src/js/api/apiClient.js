@@ -1,7 +1,7 @@
 import { getAccessToken } from './session.js';
 
 const DEFAULT_ERROR_MESSAGE = 'N\u00e3o foi poss\u00edvel concluir esta a\u00e7\u00e3o.';
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const apiBaseUrl = (import.meta.env?.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 
 let refreshSession;
 let handleUnauthorized;

@@ -24,7 +24,7 @@
         <p class="auth-copy">
           Crie sua conta com seu telefone e confirme pelo Telegram para receber alertas de preço.
         </p>
-        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+        <div class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Acesso à conta">
           <button id="login-tab" class="active" type="button" role="tab">Entrar</button>
           <button id="register-tab" type="button" role="tab">Criar conta</button>
         </div>
@@ -72,6 +72,9 @@
                 <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
               </svg></button
           ></label>
+          <button class="text-button forgot-pin-button" id="forgot-pin-button" type="button">
+            Esqueci meu PIN
+          </button>
           <button class="primary-button" type="submit">Entrar</button>
         </form>
         <form id="register-form" class="auth-form" hidden>
@@ -120,9 +123,65 @@
           ></label>
           <button class="primary-button" type="submit">Continuar</button>
         </form>
+        <form id="recovery-form" class="auth-form" hidden>
+          <p class="auth-copy">Informe seu telefone para receber um código no Telegram.</p>
+          <label
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
+                inputmode="numeric"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
+          <button class="primary-button" type="submit">Continuar</button>
+          <button
+            class="text-button forgot-pin-button"
+            id="recovery-back-button"
+            type="button"
+            aria-label="Voltar para a tela de entrada"
+          >
+            Voltar para entrar
+          </button>
+        </form>
+        <form id="reset-pin-form" class="auth-form" hidden>
+          <p class="auth-copy">Crie um novo PIN de quatro números para acessar sua conta.</p>
+          <label
+            >Novo PIN de 4 números<input
+              name="pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+          <label
+            >Confirme o novo PIN<input
+              name="confirmacaoPin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+          <button class="primary-button" type="submit">Salvar novo PIN</button>
+        </form>
         <div class="telegram-step" id="telegram-step" hidden>
-          <strong>Confirme no Telegram</strong>
-          <p>Abra o bot, envie <code>/start</code> e compartilhe seu número de telefone.</p>
+          <strong>Confirme com o código do Telegram</strong>
+          <p>
+            Abra o bot e inicie a conversa. Você receberá um código de 6 dígitos no chat, seja no
+            celular, desktop ou Telegram Web.
+          </p>
           <a
             id="telegram-link"
             class="telegram-link"
@@ -131,6 +190,23 @@
             rel="noopener noreferrer"
             >Abrir Telegram</a
           >
+          <form id="verification-form" class="auth-form">
+            <label
+              >Código de 6 dígitos<input
+                id="verification-code"
+                name="codigo"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                autocomplete="one-time-code"
+                required
+              />
+            </label>
+            <button id="verification-submit" class="primary-button" type="submit" disabled>
+              Confirmar código
+            </button>
+          </form>
         </div>
         <p class="auth-message" id="auth-message" aria-live="polite"></p>
       </div>
