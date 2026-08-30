@@ -48,6 +48,28 @@ test('inicia a recuperação com o telefone informado', async () => {
   assert.equal(verification.id, verificationId);
 });
 
+test('expõe o erro retornado ao iniciar a recuperação', async () => {
+  globalThis.fetch = async () =>
+    response(404, JSON.stringify({ message: 'Telefone não encontrado.' }));
+
+  await assert.rejects(authApi.startRecovery('+5561999999999'), /Telefone não encontrado\./);
+});
+
+test('rejeita uma resposta de recuperação com JSON inválido', async () => {
+  const originalConsoleError = globalThis.console.error;
+  globalThis.console.error = () => {};
+  globalThis.fetch = async () => response(202, 'não é JSON');
+
+  try {
+    await assert.rejects(
+      authApi.startRecovery('+5561999999999'),
+      /A API retornou uma resposta inválida\./,
+    );
+  } finally {
+    globalThis.console.error = originalConsoleError;
+  }
+});
+
 test('envia o token e o novo PIN para redefinição', async () => {
   let request;
   globalThis.fetch = async (url, options) => {
@@ -63,6 +85,16 @@ test('envia o token e o novo PIN para redefinição', async () => {
     tokenRedefinicao: 'token-redefinicao',
     pin: '4321',
   });
+});
+
+test('expõe o erro retornado ao redefinir o PIN', async () => {
+  globalThis.fetch = async () =>
+    response(401, JSON.stringify({ message: 'Token de redefinição inválido.' }));
+
+  await assert.rejects(
+    authApi.resetPin('token-inválido', '4321'),
+    /Token de redefinição inválido\./,
+  );
 });
 
 test('expõe o erro retornado para um código inválido ou expirado', async () => {
