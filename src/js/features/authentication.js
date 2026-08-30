@@ -154,6 +154,17 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     showMessage(message, 'error');
   }
 
+  async function continueRecovery() {
+    const verification = await authApi.verificationStatus(activeVerification.id);
+    if (verification.status !== 'VERIFICADA') {
+      throw new Error('A verificação ainda não está disponível para redefinir o PIN.');
+    }
+    if (!verification.tokenRedefinicao) {
+      throw new Error('A API não retornou o token necessário para redefinir o PIN.');
+    }
+    showResetPin(verification.tokenRedefinicao, activeVerification.phone);
+  }
+
   async function handleLogin(event) {
     event.preventDefault();
     const { telefone, pin } = Object.fromEntries(new FormData(elements.loginForm));
@@ -231,11 +242,19 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     const code = elements.verificationCode.value;
     if (!activeVerification || !validateVerificationCode(code)) return;
 
-    let confirmed = false;
-    setLoading(elements.verificationSubmit, true, 'Confirmar código');
+    const wasConfirmed = activeVerification.codeConfirmed;
+    setLoading(
+      elements.verificationSubmit,
+      true,
+      wasConfirmed ? 'Tentar novamente' : 'Confirmar código',
+    );
     try {
+      if (wasConfirmed) {
+        await continueRecovery();
+        return;
+      }
+
       await authApi.confirmVerification(activeVerification.id, code);
-      confirmed = true;
       if (activeVerification.purpose === 'registration') {
         const { phone } = activeVerification;
         showPanel('login');
@@ -244,25 +263,25 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
         return;
       }
 
-      const verification = await authApi.verificationStatus(activeVerification.id);
-      if (verification.status !== 'VERIFICADA' || !verification.tokenRedefinicao) {
-        throw new Error(
-          'Não foi possível preparar a redefinição do PIN. Inicie a recuperação novamente.',
-        );
-      }
-      showResetPin(verification.tokenRedefinicao, activeVerification.phone);
+      activeVerification.codeConfirmed = true;
+      await continueRecovery();
     } catch (error) {
-      if (confirmed && activeVerification?.purpose === 'recovery') {
-        activeVerification = undefined;
+      if (activeVerification?.purpose === 'recovery' && activeVerification.codeConfirmed) {
         showMessage(
-          'Código confirmado, mas não foi possível preparar a redefinição do PIN. Inicie a recuperação novamente.',
+          `Código confirmado, mas não foi possível preparar a redefinição do PIN. ${error.message} Tente novamente.`,
           'error',
         );
         return;
       }
       showVerificationError(error);
     } finally {
-      if (activeVerification) setLoading(elements.verificationSubmit, false, 'Confirmar código');
+      if (activeVerification) {
+        setLoading(
+          elements.verificationSubmit,
+          false,
+          activeVerification.codeConfirmed ? 'Tentar novamente' : 'Confirmar código',
+        );
+      }
     }
   }
 
@@ -314,7 +333,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     elements.loginTab.addEventListener('click', () => showPanel('login'));
     elements.registerTab.addEventListener('click', () => showPanel('register'));
     elements.forgotPinButton.addEventListener('click', () => showPanel('recovery'));
-    document.querySelector('[data-show-login]').addEventListener('click', () => showPanel('login'));
+    elements.recoveryBackButton.addEventListener('click', () => showPanel('login'));
     elements.loginForm.addEventListener('submit', handleLogin);
     elements.registerForm.addEventListener('submit', handleRegistration);
     elements.recoveryForm.addEventListener('submit', handleRecovery);

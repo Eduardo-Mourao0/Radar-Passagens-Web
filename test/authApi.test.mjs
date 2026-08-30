@@ -42,3 +42,32 @@ test('expõe o erro retornado para um código inválido ou expirado', async () =
     /Código de verificação inválido ou expirado\./,
   );
 });
+
+test('expõe erros de servidor ao confirmar o código', async () => {
+  globalThis.fetch = async () => response(500, JSON.stringify({ message: 'Erro temporário.' }));
+
+  await assert.rejects(authApi.confirmVerification(verificationId, '123456'), /Erro temporário\./);
+});
+
+test('expõe falhas de rede ao confirmar o código', async () => {
+  globalThis.fetch = async () => {
+    throw new Error('Falha de rede.');
+  };
+
+  await assert.rejects(authApi.confirmVerification(verificationId, '123456'), /Falha de rede\./);
+});
+
+test('rejeita respostas de erro com JSON inválido', async () => {
+  const originalConsoleError = globalThis.console.error;
+  globalThis.console.error = () => {};
+  globalThis.fetch = async () => response(500, 'não é JSON');
+
+  try {
+    await assert.rejects(
+      authApi.confirmVerification(verificationId, '123456'),
+      /A API retornou uma resposta inválida\./,
+    );
+  } finally {
+    globalThis.console.error = originalConsoleError;
+  }
+});
