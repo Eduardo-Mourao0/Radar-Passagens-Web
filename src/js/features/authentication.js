@@ -51,11 +51,46 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   }
 
   function validatePhone(phone) {
-    return /^\+[1-9]\d{7,14}$/.test(phone);
+    return /^\+55\d{10,11}$/.test(phone);
   }
 
   function normalizePhone(phone) {
-    return phone.trim().replace(/[\s()-]/g, '');
+    return `+55${phone.trim().replace(/\D/g, '')}`;
+  }
+
+  function formatPhone(phone) {
+    const digits = phone.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) return digits ? `(${digits}` : '';
+
+    const areaCode = digits.slice(0, 2);
+    const subscriberNumber = digits.slice(2);
+    if (subscriberNumber.length <= 4) return `(${areaCode}) ${subscriberNumber}`;
+
+    const firstPartLength = digits.length > 10 ? 5 : 4;
+    const firstPart = subscriberNumber.slice(0, firstPartLength);
+    const secondPart = subscriberNumber.slice(firstPartLength);
+    return secondPart ? `(${areaCode}) ${firstPart}-${secondPart}` : `(${areaCode}) ${firstPart}`;
+  }
+
+  function setupPhoneInputs() {
+    [elements.loginForm, elements.registerForm].forEach((form) => {
+      const input = form.elements.telefone;
+      input.addEventListener('input', () => {
+        input.value = formatPhone(input.value);
+      });
+    });
+  }
+
+  function setupPinToggles() {
+    document.querySelectorAll('[data-pin-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const input = button.parentElement.querySelector('input[name="pin"]');
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        button.setAttribute('aria-label', isVisible ? 'Mostrar PIN' : 'Ocultar PIN');
+        button.title = isVisible ? 'Mostrar PIN' : 'Ocultar PIN';
+      });
+    });
   }
 
   async function checkVerification(id, phone) {
@@ -66,7 +101,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
       clearVerificationPolling();
       if (verification.status === 'VERIFICADA') {
         showPanel('login');
-        elements.loginForm.elements.telefone.value = phone;
+        elements.loginForm.elements.telefone.value = formatPhone(phone.replace(/^\+55/, ''));
         showMessage('Telefone confirmado. Entre com seu PIN para acessar suas rotas.', 'success');
         return false;
       }
@@ -175,6 +210,8 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   }
 
   function setup() {
+    setupPhoneInputs();
+    setupPinToggles();
     elements.loginTab.addEventListener('click', () => showPanel('login'));
     elements.registerTab.addEventListener('click', () => showPanel('register'));
     elements.loginForm.addEventListener('submit', handleLogin);
