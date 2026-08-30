@@ -155,6 +155,10 @@ button {
 .auth-form .primary-button {
   justify-content: center;
 }
+.forgot-pin-button {
+  justify-self: start;
+  padding: 0;
+}
 .phone-input {
   display: flex;
   align-items: center;
@@ -232,6 +236,26 @@ button {
   margin: 7px 0 13px;
   font-size: 13px;
   line-height: 1.45;
+}
+.telegram-step .auth-form {
+  margin-top: 16px;
+}
+.telegram-step .auth-form label {
+  color: #17684d;
+}
+.telegram-step .auth-form input {
+  border-color: #9bceb9;
+  background: #fff;
+}
+.telegram-step .auth-form input[name='codigo'] {
+  font-family: 'DM Mono', monospace;
+  font-size: 19px;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 .telegram-link {
   color: inherit;

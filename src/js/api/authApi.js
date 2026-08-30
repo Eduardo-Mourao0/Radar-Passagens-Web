@@ -17,7 +17,25 @@ export const authApi = {
       body: JSON.stringify({ telefone: phone, pin }),
       requiresAuth: false,
     }),
+  startRecovery: (phone) =>
+    apiClient('/auth/recuperacoes', {
+      method: 'POST',
+      body: JSON.stringify({ telefone: phone }),
+      requiresAuth: false,
+    }),
   verificationStatus: (id) => apiClient(`/auth/verificacoes/${id}`, { requiresAuth: false }),
+  confirmVerification: (id, code) =>
+    apiClient(`/auth/verificacoes/${id}/confirmar`, {
+      method: 'POST',
+      body: JSON.stringify({ codigo: code }),
+      requiresAuth: false,
+    }),
+  resetPin: (tokenRedefinicao, pin) =>
+    apiClient('/auth/redefinir-senha', {
+      method: 'POST',
+      body: JSON.stringify({ tokenRedefinicao, pin }),
+      requiresAuth: false,
+    }),
   login: (phone, pin) =>
     storeSession(() =>
       apiClient('/auth/login', {
