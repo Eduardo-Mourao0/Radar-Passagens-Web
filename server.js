@@ -19,7 +19,13 @@ const server = http.createServer((req, res) => {
         headers: req.headers,
       },
       (upstreamRes) => {
-        res.writeHead(upstreamRes.statusCode, upstreamRes.headers);
+        const headers = { ...upstreamRes.headers };
+        if (Array.isArray(headers['set-cookie'])) {
+          headers['set-cookie'] = headers['set-cookie'].map((cookie) =>
+            cookie.replace(/;\s*Path=\/auth(?=;|$)/i, '; Path=/api/auth'),
+          );
+        }
+        res.writeHead(upstreamRes.statusCode, headers);
         upstreamRes.pipe(res);
       },
     );

@@ -1,10 +1,27 @@
+import { getAccessToken } from './session.js';
+
 const DEFAULT_ERROR_MESSAGE = 'N\u00e3o foi poss\u00edvel concluir esta a\u00e7\u00e3o.';
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
 
+let refreshSession;
+let handleUnauthorized;
+
+export function configureSession({ onRefresh, onUnauthorized }) {
+  refreshSession = onRefresh;
+  handleUnauthorized = onUnauthorized;
+}
+
 export async function apiClient(path, options = {}) {
+  const { requiresAuth = true, retryOnUnauthorized = true, headers, ...requestOptions } = options;
+  const accessToken = requiresAuth ? getAccessToken() : null;
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...headers,
+    },
+    ...requestOptions,
   });
 
   if (response.status === 204) return null;
@@ -21,6 +38,20 @@ export async function apiClient(path, options = {}) {
         error,
       });
       throw new Error('A API retornou uma resposta inv\u00e1lida. Tente novamente mais tarde.');
+    }
+  }
+
+  if (
+    response.status === 401 &&
+    requiresAuth &&
+    retryOnUnauthorized &&
+    typeof refreshSession === 'function'
+  ) {
+    try {
+      await refreshSession();
+      return apiClient(path, { ...options, retryOnUnauthorized: false });
+    } catch {
+      handleUnauthorized?.();
     }
   }
 

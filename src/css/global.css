@@ -17,6 +17,9 @@ body {
   margin: 0;
   min-width: 320px;
 }
+[hidden] {
+  display: none !important;
+}
 button,
 input {
   font: inherit;
@@ -56,6 +59,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 .api-status i {
   width: 8px;
@@ -69,6 +73,116 @@ button {
 }
 .api-status.offline i {
   background: var(--accent);
+}
+.logout-button {
+  margin-left: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+.logout-button:hover {
+  color: var(--accent);
+}
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: radial-gradient(circle at 100% 0, #ffd8cb 0, transparent 32%), var(--paper);
+}
+.auth-card {
+  width: min(100%, 470px);
+  padding: 38px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 22px 60px #0c122214;
+}
+.auth-card .brand {
+  display: inline-block;
+  margin-bottom: 46px;
+}
+.auth-card h1 {
+  max-width: 370px;
+  margin: 0;
+  font-size: 38px;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+.auth-copy {
+  margin: 18px 0 27px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.auth-tabs button {
+  padding: 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+.auth-tabs button.active {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+.auth-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.auth-form input {
+  width: 100%;
+  border: 1px solid #ccd0d7;
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--ink);
+  outline-color: var(--accent);
+}
+.auth-form .primary-button {
+  justify-content: center;
+}
+.telegram-step {
+  margin-top: 22px;
+  padding: 17px;
+  border-radius: 10px;
+  background: #eaf7f1;
+  color: #17684d;
+}
+.telegram-step p {
+  margin: 7px 0 13px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.telegram-link {
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+.auth-message {
+  min-height: 20px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.auth-message.error {
+  color: #bf3b25;
+}
+.auth-message.success {
+  color: var(--green);
 }
 .hero {
   padding: 72px 0 66px;

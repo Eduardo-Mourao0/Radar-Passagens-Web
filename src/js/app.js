@@ -1,12 +1,24 @@
+import { authApi } from './api/authApi.js';
 import { routesApi } from './api/routesApi.js';
 import { setupAirportAutocomplete } from './components/airportAutocomplete.js';
 import { airports } from './data/airports.js';
 import { createBookingFeature } from './features/booking.js';
+import { createAuthenticationFeature } from './features/authentication.js';
 import { createPriceAlertFeature } from './features/priceAlert.js';
 import { createPriceHistoryFeature } from './features/priceHistory.js';
 import { createRoutesFeature } from './features/routes.js';
 
 const elements = {
+  appShell: document.querySelector('#app-shell'),
+  authScreen: document.querySelector('#auth-screen'),
+  authLoginForm: document.querySelector('#login-form'),
+  authRegisterForm: document.querySelector('#register-form'),
+  authLoginTab: document.querySelector('#login-tab'),
+  authRegisterTab: document.querySelector('#register-tab'),
+  authMessage: document.querySelector('#auth-message'),
+  telegramStep: document.querySelector('#telegram-step'),
+  telegramLink: document.querySelector('#telegram-link'),
+  logoutButton: document.querySelector('#logout-button'),
   form: document.querySelector('#route-form'),
   formMessage: document.querySelector('#form-message'),
   grid: document.querySelector('#routes-grid'),
@@ -41,7 +53,7 @@ function setupAirportSearch() {
   });
 }
 
-function init() {
+function setupDashboard() {
   document.querySelector('#data-ida').min = new Date().toISOString().slice(0, 10);
   setupAirportSearch();
 
@@ -75,7 +87,30 @@ function init() {
   });
 
   routesFeature.setup();
-  routesFeature.loadRoutes();
+  return routesFeature;
 }
 
-init();
+async function init() {
+  const routesFeature = setupDashboard();
+  const authentication = createAuthenticationFeature({
+    elements: {
+      screen: elements.authScreen,
+      appShell: elements.appShell,
+      loginForm: elements.authLoginForm,
+      registerForm: elements.authRegisterForm,
+      loginTab: elements.authLoginTab,
+      registerTab: elements.authRegisterTab,
+      message: elements.authMessage,
+      telegramStep: elements.telegramStep,
+      telegramLink: elements.telegramLink,
+      logoutButton: elements.logoutButton,
+    },
+    authApi,
+    onAuthenticated: () => routesFeature.loadRoutes(),
+  });
+
+  authentication.setup();
+  await authentication.restoreSession();
+}
+
+void init();

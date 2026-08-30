@@ -16,10 +16,80 @@
     <link rel="stylesheet" href="/src/css/booking.css" />
   </head>
   <body>
-    <main class="shell">
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <a class="brand" href="#"><b>✦</b> radar<span>passagens</span></a>
+        <p class="eyebrow">SUA ÁREA PESSOAL</p>
+        <h1 id="auth-title">Monitore tarifas do seu jeito.</h1>
+        <p class="auth-copy">
+          Crie sua conta com seu telefone e confirme pelo Telegram para receber alertas de preço.
+        </p>
+        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+          <button id="login-tab" class="active" type="button" role="tab">Entrar</button>
+          <button id="register-tab" type="button" role="tab">Criar conta</button>
+        </div>
+        <form id="login-form" class="auth-form">
+          <label
+            >Telefone<input
+              name="telefone"
+              type="tel"
+              placeholder="+55 61 99999-9999"
+              autocomplete="tel"
+              required
+          /></label>
+          <label
+            >PIN de 4 números<input
+              name="pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="current-password"
+              required
+          /></label>
+          <button class="primary-button" type="submit">Entrar</button>
+        </form>
+        <form id="register-form" class="auth-form" hidden>
+          <label
+            >Telefone<input
+              name="telefone"
+              type="tel"
+              placeholder="+55 61 99999-9999"
+              autocomplete="tel"
+              required
+          /></label>
+          <label
+            >Crie um PIN de 4 números<input
+              name="pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required
+          /></label>
+          <button class="primary-button" type="submit">Continuar</button>
+        </form>
+        <div class="telegram-step" id="telegram-step" hidden>
+          <strong>Confirme no Telegram</strong>
+          <p>Abra o bot, envie <code>/start</code> e compartilhe seu número de telefone.</p>
+          <a
+            id="telegram-link"
+            class="telegram-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Abrir Telegram</a
+          >
+        </div>
+        <p class="auth-message" id="auth-message" aria-live="polite"></p>
+      </div>
+    </section>
+    <main class="shell" id="app-shell" hidden>
       <header class="topbar">
         <a class="brand" href="#"><b>✦</b> radar<span>passagens</span></a>
         <div class="api-status" id="api-status"><i></i><span>Conectando à API</span></div>
+        <button class="logout-button" id="logout-button" type="button">Sair</button>
       </header>
       <section class="hero">
         <p class="eyebrow">MONITORAMENTO INTELIGENTE</p>
