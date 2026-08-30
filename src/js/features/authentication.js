@@ -54,12 +54,20 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     return /^\+55\d{10,11}$/.test(phone);
   }
 
+  function getNationalPhoneDigits(phone) {
+    let digits = phone.replace(/\D/g, '');
+    if (digits.startsWith('55') && digits.length > 11) {
+      digits = digits.slice(2);
+    }
+    return digits.slice(0, 11);
+  }
+
   function normalizePhone(phone) {
-    return `+55${phone.trim().replace(/\D/g, '')}`;
+    return `+55${getNationalPhoneDigits(phone)}`;
   }
 
   function formatPhone(phone) {
-    const digits = phone.replace(/\D/g, '').slice(0, 11);
+    const digits = getNationalPhoneDigits(phone);
     if (digits.length <= 2) return digits ? `(${digits}` : '';
 
     const areaCode = digits.slice(0, 2);
@@ -75,6 +83,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   function setupPhoneInputs() {
     [elements.loginForm, elements.registerForm].forEach((form) => {
       const input = form.elements.telefone;
+      if (!(input instanceof HTMLInputElement)) return;
       input.addEventListener('input', () => {
         input.value = formatPhone(input.value);
       });
@@ -84,10 +93,12 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   function setupPinToggles() {
     document.querySelectorAll('[data-pin-toggle]').forEach((button) => {
       button.addEventListener('click', () => {
-        const input = button.parentElement.querySelector('input[name="pin"]');
+        const input = document.querySelector(`#${button.dataset.pinToggle}`);
+        if (!(input instanceof HTMLInputElement)) return;
         const isVisible = input.type === 'text';
         input.type = isVisible ? 'password' : 'text';
         button.setAttribute('aria-label', isVisible ? 'Mostrar PIN' : 'Ocultar PIN');
+        button.setAttribute('aria-pressed', String(!isVisible));
         button.title = isVisible ? 'Mostrar PIN' : 'Ocultar PIN';
       });
     });
