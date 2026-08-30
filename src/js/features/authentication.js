@@ -23,6 +23,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     elements.telegramStep.hidden = true;
     activeVerification = undefined;
     resetToken = undefined;
+    recoveryPhone = undefined;
     showMessage('');
   }
 

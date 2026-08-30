@@ -3,6 +3,11 @@ import test from 'node:test';
 import { authApi } from '../src/js/api/authApi.js';
 
 const verificationId = 'c9e0e8f7-39ef-4279-87a8-2867f5db95eb';
+const verificationResponse = {
+  id: verificationId,
+  expiraEm: '2026-08-30T22:00:00.000Z',
+  urlTelegram: 'https://t.me/radarpassagensbot?start=token',
+};
 
 function response(status, body = '') {
   return {
@@ -25,6 +30,7 @@ test('envia o código de seis dígitos para confirmar a verificação', async ()
   assert.equal(request.options.method, 'POST');
   assert.deepEqual(JSON.parse(request.options.body), { codigo: '123456' });
   assert.equal(request.options.headers['Content-Type'], 'application/json');
+  assert.equal(request.options.headers.Authorization, undefined);
 });
 
 test('conclui a confirmação quando a API responde sem conteúdo', async () => {
@@ -37,7 +43,7 @@ test('inicia a recuperação com o telefone informado', async () => {
   let request;
   globalThis.fetch = async (url, options) => {
     request = { url, options };
-    return response(202, JSON.stringify({ id: verificationId }));
+    return response(202, JSON.stringify(verificationResponse));
   };
 
   const verification = await authApi.startRecovery('+5561999999999');
@@ -68,6 +74,15 @@ test('rejeita uma resposta de recuperação com JSON inválido', async () => {
   } finally {
     globalThis.console.error = originalConsoleError;
   }
+});
+
+test('rejeita uma resposta de recuperação sem os dados do Telegram', async () => {
+  globalThis.fetch = async () => response(202, JSON.stringify({ id: verificationId }));
+
+  await assert.rejects(
+    authApi.startRecovery('+5561999999999'),
+    /A API não retornou os dados necessários para confirmar no Telegram\./,
+  );
 });
 
 test('envia o token e o novo PIN para redefinição', async () => {
