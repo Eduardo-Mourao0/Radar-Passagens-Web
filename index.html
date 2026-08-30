@@ -30,44 +30,80 @@
         </div>
         <form id="login-form" class="auth-form">
           <label
-            >Telefone<input
-              name="telefone"
-              type="tel"
-              placeholder="+55 61 99999-9999"
-              autocomplete="tel"
-              required
-          /></label>
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
+                inputmode="numeric"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
           <label
             >PIN de 4 números<input
               name="pin"
+              id="login-pin"
               type="password"
               inputmode="numeric"
               pattern="[0-9]{4}"
               maxlength="4"
               autocomplete="current-password"
               required
-          /></label>
+            /><button
+              class="pin-toggle"
+              type="button"
+              data-pin-toggle="login-pin"
+              aria-label="Mostrar PIN"
+              aria-pressed="false"
+              title="Mostrar PIN"
+            >
+              👁
+            </button></label
+          >
           <button class="primary-button" type="submit">Entrar</button>
         </form>
         <form id="register-form" class="auth-form" hidden>
           <label
-            >Telefone<input
-              name="telefone"
-              type="tel"
-              placeholder="+55 61 99999-9999"
-              autocomplete="tel"
-              required
-          /></label>
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
+                inputmode="numeric"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
           <label
             >Crie um PIN de 4 números<input
               name="pin"
+              id="register-pin"
               type="password"
               inputmode="numeric"
               pattern="[0-9]{4}"
               maxlength="4"
               autocomplete="new-password"
               required
-          /></label>
+            /><button
+              class="pin-toggle"
+              type="button"
+              data-pin-toggle="register-pin"
+              aria-label="Mostrar PIN"
+              aria-pressed="false"
+              title="Mostrar PIN"
+            >
+              👁
+            </button></label
+          >
           <button class="primary-button" type="submit">Continuar</button>
         </form>
         <div class="telegram-step" id="telegram-step" hidden>

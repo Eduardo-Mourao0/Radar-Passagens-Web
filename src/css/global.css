@@ -142,6 +142,7 @@ button {
   gap: 8px;
   color: var(--muted);
   font-size: 13px;
+  position: relative;
 }
 .auth-form input {
   width: 100%;
@@ -153,6 +154,39 @@ button {
 }
 .auth-form .primary-button {
   justify-content: center;
+}
+.phone-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccd0d7;
+  border-radius: 8px;
+  background: #fff;
+}
+.phone-prefix {
+  padding: 12px 0 12px 12px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.auth-form .phone-input input {
+  border: 0;
+  border-radius: 0;
+  padding-left: 6px;
+}
+.auth-form input[name='pin'] {
+  padding-right: 46px;
+}
+.pin-toggle {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+.pin-toggle:hover {
+  color: var(--accent);
 }
 .telegram-step {
   margin-top: 22px;
