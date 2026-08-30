@@ -33,6 +33,38 @@ test('conclui a confirmação quando a API responde sem conteúdo', async () => 
   await assert.doesNotReject(authApi.confirmVerification(verificationId, '123456'));
 });
 
+test('inicia a recuperação com o telefone informado', async () => {
+  let request;
+  globalThis.fetch = async (url, options) => {
+    request = { url, options };
+    return response(202, JSON.stringify({ id: verificationId }));
+  };
+
+  const verification = await authApi.startRecovery('+5561999999999');
+
+  assert.equal(request.url, '/api/auth/recuperacoes');
+  assert.equal(request.options.method, 'POST');
+  assert.deepEqual(JSON.parse(request.options.body), { telefone: '+5561999999999' });
+  assert.equal(verification.id, verificationId);
+});
+
+test('envia o token e o novo PIN para redefinição', async () => {
+  let request;
+  globalThis.fetch = async (url, options) => {
+    request = { url, options };
+    return response(204);
+  };
+
+  await authApi.resetPin('token-redefinicao', '4321');
+
+  assert.equal(request.url, '/api/auth/redefinir-senha');
+  assert.equal(request.options.method, 'POST');
+  assert.deepEqual(JSON.parse(request.options.body), {
+    tokenRedefinicao: 'token-redefinicao',
+    pin: '4321',
+  });
+});
+
 test('expõe o erro retornado para um código inválido ou expirado', async () => {
   globalThis.fetch = async () =>
     response(401, JSON.stringify({ message: 'Código de verificação inválido ou expirado.' }));

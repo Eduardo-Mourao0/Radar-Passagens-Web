@@ -287,6 +287,11 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
 
   async function handleResetPin(event) {
     event.preventDefault();
+    if (!resetToken) {
+      showMessage('Inicie a recuperação novamente para criar um novo PIN.', 'error');
+      return;
+    }
+
     const { pin, confirmacaoPin } = Object.fromEntries(new FormData(elements.resetPinForm));
     if (!validatePin(pin)) {
       showMessage('Crie um PIN de quatro números.', 'error');
@@ -294,10 +299,6 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     }
     if (pin !== confirmacaoPin) {
       showMessage('Os PINs informados não são iguais.', 'error');
-      return;
-    }
-    if (!resetToken) {
-      showMessage('Inicie a recuperação novamente para criar um novo PIN.', 'error');
       return;
     }
 
@@ -340,9 +341,6 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     elements.verificationForm.addEventListener('submit', handleVerificationConfirmation);
     elements.resetPinForm.addEventListener('submit', handleResetPin);
     elements.verificationCode.addEventListener('input', () => {
-      elements.verificationCode.value = elements.verificationCode.value
-        .replace(/\D/g, '')
-        .slice(0, 6);
       elements.verificationSubmit.disabled = !validateVerificationCode(
         elements.verificationCode.value,
       );
