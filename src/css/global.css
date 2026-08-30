@@ -158,19 +158,31 @@ button {
 .phone-input {
   display: flex;
   align-items: center;
+  overflow: hidden;
   border: 1px solid #ccd0d7;
   border-radius: 8px;
   background: #fff;
 }
+.phone-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #f1654420;
+}
 .phone-prefix {
-  padding: 12px 0 12px 12px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-right: 1px solid #ccd0d7;
+  background: #f2f3f5;
   color: var(--ink);
   font-weight: 600;
 }
 .auth-form .phone-input input {
   border: 0;
   border-radius: 0;
-  padding-left: 6px;
+  min-width: 0;
+  padding-left: 12px;
+  background: transparent;
 }
 .auth-form input[name='pin'] {
   padding-right: 46px;
@@ -179,11 +191,32 @@ button {
   position: absolute;
   right: 10px;
   bottom: 8px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 18px;
   line-height: 1;
+}
+.eye-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.eye-open {
+  display: none;
+}
+.pin-toggle.is-visible .eye-closed {
+  display: none;
+}
+.pin-toggle.is-visible .eye-open {
+  display: block;
 }
 .pin-toggle:hover {
   color: var(--accent);

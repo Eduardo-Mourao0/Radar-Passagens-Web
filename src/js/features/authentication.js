@@ -97,6 +97,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
         if (!(input instanceof HTMLInputElement)) return;
         const isVisible = input.type === 'text';
         input.type = isVisible ? 'password' : 'text';
+        button.classList.toggle('is-visible', !isVisible);
         button.setAttribute('aria-label', isVisible ? 'Mostrar PIN' : 'Ocultar PIN');
         button.setAttribute('aria-pressed', String(!isVisible));
         button.title = isVisible ? 'Mostrar PIN' : 'Ocultar PIN';
