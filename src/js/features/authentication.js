@@ -47,6 +47,10 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     return /^\d{4}$/.test(pin);
   }
 
+  function validatePhone(phone) {
+    return phone.length >= 8 && phone.length <= 20;
+  }
+
   async function checkVerification(id, phone) {
     try {
       const verification = await authApi.verificationStatus(id);
@@ -72,6 +76,11 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   async function handleLogin(event) {
     event.preventDefault();
     const { telefone, pin } = Object.fromEntries(new FormData(elements.loginForm));
+    const phone = telefone.trim();
+    if (!validatePhone(phone)) {
+      showMessage('Informe um telefone entre 8 e 20 caracteres.', 'error');
+      return;
+    }
     if (!validatePin(pin)) {
       showMessage('Informe um PIN de quatro números.', 'error');
       return;
@@ -80,7 +89,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     const button = elements.loginForm.querySelector('button[type="submit"]');
     setLoading(button, true, 'Entrar');
     try {
-      await authApi.login(telefone.trim(), pin);
+      await authApi.login(phone, pin);
       elements.loginForm.reset();
       showApplication();
     } catch (error) {
@@ -93,6 +102,11 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   async function handleRegistration(event) {
     event.preventDefault();
     const { telefone, pin } = Object.fromEntries(new FormData(elements.registerForm));
+    const phone = telefone.trim();
+    if (!validatePhone(phone)) {
+      showMessage('Informe um telefone entre 8 e 20 caracteres.', 'error');
+      return;
+    }
     if (!validatePin(pin)) {
       showMessage('Crie um PIN de quatro números.', 'error');
       return;
@@ -101,17 +115,17 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
     const button = elements.registerForm.querySelector('button[type="submit"]');
     setLoading(button, true, 'Continuar');
     try {
-      const verification = await authApi.startRegistration(telefone.trim(), pin);
+      const verification = await authApi.startRegistration(phone, pin);
       elements.telegramLink.href = verification.urlTelegram;
       elements.telegramStep.hidden = false;
       showMessage(
         'Abra o Telegram e confirme seu número. Esta página acompanhará a confirmação.',
         'success',
       );
-      await checkVerification(verification.id, telefone.trim());
+      await checkVerification(verification.id, phone);
       if (!elements.telegramStep.hidden) {
         verificationPolling = window.setInterval(
-          () => checkVerification(verification.id, telefone.trim()),
+          () => checkVerification(verification.id, phone),
           POLLING_INTERVAL,
         );
       }

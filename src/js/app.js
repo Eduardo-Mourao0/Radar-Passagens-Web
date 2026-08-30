@@ -113,4 +113,10 @@ async function init() {
   await authentication.restoreSession();
 }
 
-void init();
+init().catch((error) => {
+  console.error('Não foi possível iniciar a aplicação.', error);
+  elements.appShell.hidden = true;
+  elements.authScreen.hidden = false;
+  elements.authMessage.className = 'auth-message error';
+  elements.authMessage.textContent = 'Não foi possível iniciar a aplicação. Recarregue a página.';
+});
