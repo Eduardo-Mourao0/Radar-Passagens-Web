@@ -5,10 +5,29 @@ const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, 
 
 let refreshSession;
 let handleUnauthorized;
+let activeRefresh;
 
 export function configureSession({ onRefresh, onUnauthorized }) {
+  if (typeof onRefresh !== 'function') {
+    throw new TypeError('onRefresh deve ser uma função.');
+  }
+  if (onUnauthorized !== undefined && typeof onUnauthorized !== 'function') {
+    throw new TypeError('onUnauthorized deve ser uma função.');
+  }
   refreshSession = onRefresh;
   handleUnauthorized = onUnauthorized;
+}
+
+async function refreshAccessToken() {
+  if (!activeRefresh) {
+    activeRefresh = Promise.resolve()
+      .then(refreshSession)
+      .finally(() => {
+        activeRefresh = undefined;
+      });
+  }
+  await activeRefresh;
+  if (!getAccessToken()) throw new Error('Não foi possível renovar a sessão.');
 }
 
 export async function apiClient(path, options = {}) {
@@ -48,7 +67,7 @@ export async function apiClient(path, options = {}) {
     typeof refreshSession === 'function'
   ) {
     try {
-      await refreshSession();
+      await refreshAccessToken();
       return apiClient(path, { ...options, retryOnUnauthorized: false });
     } catch {
       handleUnauthorized?.();

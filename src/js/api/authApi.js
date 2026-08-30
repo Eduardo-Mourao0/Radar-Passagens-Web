@@ -3,6 +3,9 @@ import { clearAccessToken, saveAccessToken } from './session.js';
 
 async function storeSession(request) {
   const session = await request();
+  if (!session?.accessToken || typeof session.accessToken !== 'string') {
+    throw new Error('A API não retornou um token de acesso válido.');
+  }
   saveAccessToken(session.accessToken);
   return session;
 }

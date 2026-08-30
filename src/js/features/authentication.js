@@ -4,6 +4,7 @@ const POLLING_INTERVAL = 3000;
 
 export function createAuthenticationFeature({ elements, authApi, onAuthenticated }) {
   let verificationPolling;
+  let verificationTimeout;
 
   function showMessage(message, type = '') {
     elements.message.textContent = message;
@@ -35,7 +36,9 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
 
   function clearVerificationPolling() {
     if (verificationPolling) window.clearInterval(verificationPolling);
+    if (verificationTimeout) window.clearTimeout(verificationTimeout);
     verificationPolling = undefined;
+    verificationTimeout = undefined;
   }
 
   function setLoading(button, loading, label) {
@@ -48,37 +51,67 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   }
 
   function validatePhone(phone) {
-    return phone.length >= 8 && phone.length <= 20;
+    return /^\+[1-9]\d{7,14}$/.test(phone);
+  }
+
+  function normalizePhone(phone) {
+    return phone.trim().replace(/[\s()-]/g, '');
   }
 
   async function checkVerification(id, phone) {
     try {
       const verification = await authApi.verificationStatus(id);
-      if (verification.status === 'PENDENTE') return;
+      if (verification.status === 'PENDENTE') return true;
 
       clearVerificationPolling();
       if (verification.status === 'VERIFICADA') {
         showPanel('login');
         elements.loginForm.elements.telefone.value = phone;
         showMessage('Telefone confirmado. Entre com seu PIN para acessar suas rotas.', 'success');
-        return;
+        return false;
       }
 
       elements.telegramStep.hidden = true;
       showMessage('O prazo de confirmação expirou. Inicie o cadastro novamente.', 'error');
+      return false;
     } catch (error) {
       clearVerificationPolling();
       elements.telegramStep.hidden = true;
       showMessage(error.message, 'error');
+      return false;
     }
+  }
+
+  function expireVerification() {
+    clearVerificationPolling();
+    elements.telegramStep.hidden = true;
+    showMessage('O prazo de confirmação expirou. Inicie o cadastro novamente.', 'error');
+  }
+
+  function startVerificationPolling(id, phone, expiresAt) {
+    const remainingTime = new Date(expiresAt).getTime() - Date.now();
+    if (!Number.isFinite(remainingTime) || remainingTime <= 0) {
+      expireVerification();
+      return;
+    }
+
+    let checking = false;
+    verificationPolling = window.setInterval(async () => {
+      if (checking) return;
+      checking = true;
+      const isPending = await checkVerification(id, phone);
+      checking = false;
+      if (!isPending) clearVerificationPolling();
+    }, POLLING_INTERVAL);
+    verificationTimeout = window.setTimeout(expireVerification, remainingTime);
   }
 
   async function handleLogin(event) {
     event.preventDefault();
     const { telefone, pin } = Object.fromEntries(new FormData(elements.loginForm));
-    const phone = telefone.trim();
+    const phone = normalizePhone(telefone);
     if (!validatePhone(phone)) {
-      showMessage('Informe um telefone entre 8 e 20 caracteres.', 'error');
+      showMessage('Informe um telefone no formato +5561999999999.', 'error');
       return;
     }
     if (!validatePin(pin)) {
@@ -102,9 +135,9 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   async function handleRegistration(event) {
     event.preventDefault();
     const { telefone, pin } = Object.fromEntries(new FormData(elements.registerForm));
-    const phone = telefone.trim();
+    const phone = normalizePhone(telefone);
     if (!validatePhone(phone)) {
-      showMessage('Informe um telefone entre 8 e 20 caracteres.', 'error');
+      showMessage('Informe um telefone no formato +5561999999999.', 'error');
       return;
     }
     if (!validatePin(pin)) {
@@ -122,13 +155,8 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
         'Abra o Telegram e confirme seu número. Esta página acompanhará a confirmação.',
         'success',
       );
-      await checkVerification(verification.id, phone);
-      if (!elements.telegramStep.hidden) {
-        verificationPolling = window.setInterval(
-          () => checkVerification(verification.id, phone),
-          POLLING_INTERVAL,
-        );
-      }
+      const isPending = await checkVerification(verification.id, phone);
+      if (isPending) startVerificationPolling(verification.id, phone, verification.expiraEm);
     } catch (error) {
       showMessage(error.message, 'error');
     } finally {
