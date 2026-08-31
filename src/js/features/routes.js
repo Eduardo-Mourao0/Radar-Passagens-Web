@@ -7,6 +7,17 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
   let pendingDeletion = null;
   const errorMessage = (error, fallback) => error?.message || fallback;
 
+  function mensagemCotacaoInicial(situacaoCotacao, acao) {
+    if (situacaoCotacao === 'ATUALIZADA') return `${acao} e cotação atualizada!`;
+    if (situacaoCotacao === 'SEM_OFERTA') {
+      return `${acao}, mas ainda não há oferta disponível para essa rota.`;
+    }
+    if (situacaoCotacao === 'INDISPONIVEL') {
+      return `${acao}, mas a cotação inicial está indisponível. Tentaremos novamente automaticamente.`;
+    }
+    return `${acao}!`;
+  }
+
   function setApiStatus(state, label) {
     apiStatus.className = `api-status ${state}`;
     apiStatus.querySelector('span').textContent = label;
@@ -64,11 +75,14 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
     submitButton.disabled = true;
     submitButton.textContent = 'Salvando\u2026';
     try {
-      await routesApi.create(route);
+      const rotaCriada = await routesApi.create(route);
       form.reset();
       delete form.elements.origem.dataset.iata;
       delete form.elements.destino.dataset.iata;
-      formMessage.textContent = 'Rota cadastrada e monitorada!';
+      formMessage.textContent = mensagemCotacaoInicial(
+        rotaCriada.situacaoCotacao,
+        'Rota cadastrada',
+      );
       await loadRoutes();
     } catch (error) {
       formMessage.textContent = error.message;
@@ -94,8 +108,18 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
 
     button.disabled = true;
     try {
-      await (button.dataset.active === 'true' ? routesApi.pause(id) : routesApi.activate(id));
+      const rotaAtualizada = await (button.dataset.active === 'true'
+        ? routesApi.pause(id)
+        : routesApi.activate(id));
       await loadRoutes();
+      if (
+        button.dataset.active !== 'true' &&
+        rotaAtualizada.situacaoCotacao !== 'ATUALIZADA'
+      ) {
+        window.alert(
+          mensagemCotacaoInicial(rotaAtualizada.situacaoCotacao, 'Rota reativada'),
+        );
+      }
     } catch (error) {
       window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel concluir esta a\u00e7\u00e3o.'));
       button.disabled = false;
