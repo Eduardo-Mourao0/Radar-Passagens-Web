@@ -16,210 +16,204 @@
     <link rel="stylesheet" href="/src/css/booking.css" />
   </head>
   <body>
-    <section
-      class="auth-screen"
-      id="auth-screen"
-      aria-labelledby="auth-title"
-      aria-busy="true"
-      data-loading
-    >
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title" aria-busy="true" data-loading>
       <div class="auth-card">
         <div class="session-loading" role="status">
           <span class="session-loading-spinner" aria-hidden="true"></span>
           Restaurando sua sessão...
         </div>
         <div class="auth-content">
-          <a class="brand" href="#"><b>✦</b> radar<span>passagens</span></a>
-          <p class="eyebrow">SUA ÁREA PESSOAL</p>
-          <h1 id="auth-title">Monitore tarifas do seu jeito.</h1>
-          <p class="auth-copy">
-            Crie sua conta com seu telefone e confirme pelo Telegram para receber alertas de preço.
-          </p>
-          <div class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Acesso à conta">
-            <button id="login-tab" class="active" type="button" role="tab">Entrar</button>
-            <button id="register-tab" type="button" role="tab">Criar conta</button>
-          </div>
-          <form id="login-form" class="auth-form">
-            <label
-              >Telefone
-              <span class="phone-input">
-                <span class="phone-prefix">+55</span>
-                <input
-                  name="telefone"
-                  type="tel"
-                  placeholder="(61) 99999-9999"
-                  inputmode="numeric"
-                  maxlength="15"
-                  autocomplete="tel"
-                  required
-                />
-              </span>
-            </label>
-            <label
-              >PIN de 4 números<input
-                name="pin"
-                id="login-pin"
-                type="password"
+        <a class="brand" href="#"><b>✦</b> radar<span>passagens</span></a>
+        <p class="eyebrow">SUA ÁREA PESSOAL</p>
+        <h1 id="auth-title">Monitore tarifas do seu jeito.</h1>
+        <p class="auth-copy">
+          Crie sua conta com seu telefone e confirme pelo Telegram para receber alertas de preço.
+        </p>
+        <div class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Acesso à conta">
+          <button id="login-tab" class="active" type="button" role="tab">Entrar</button>
+          <button id="register-tab" type="button" role="tab">Criar conta</button>
+        </div>
+        <form id="login-form" class="auth-form">
+          <label
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
                 inputmode="numeric"
-                pattern="[0-9]{4}"
-                maxlength="4"
-                autocomplete="current-password"
-                required /><button
-                class="pin-toggle"
-                type="button"
-                data-pin-toggle="login-pin"
-                aria-label="Mostrar PIN"
-                aria-pressed="false"
-                title="Mostrar PIN"
-              >
-                <svg class="eye-icon eye-closed" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z" />
-                  <circle cx="12" cy="12" r="2.8" />
-                </svg>
-                <svg class="eye-icon eye-open" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.3 0 9.8 6 9.8 6a17.6 17.6 0 0 1-3.3 3.8M6.1 8.1A17.9 17.9 0 0 0 2.2 12S5.7 18 12 18c1.4 0 2.7-.3 3.8-.8"
-                  />
-                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-                </svg></button
-            ></label>
-            <button class="text-button forgot-pin-button" id="forgot-pin-button" type="button">
-              Esqueci meu PIN
-            </button>
-            <button class="primary-button" type="submit">Entrar</button>
-          </form>
-          <form id="register-form" class="auth-form" hidden>
-            <label
-              >Telefone
-              <span class="phone-input">
-                <span class="phone-prefix">+55</span>
-                <input
-                  name="telefone"
-                  type="tel"
-                  placeholder="(61) 99999-9999"
-                  inputmode="numeric"
-                  maxlength="15"
-                  autocomplete="tel"
-                  required
-                />
-              </span>
-            </label>
-            <label
-              >Crie um PIN de 4 números<input
-                name="pin"
-                id="register-pin"
-                type="password"
-                inputmode="numeric"
-                pattern="[0-9]{4}"
-                maxlength="4"
-                autocomplete="new-password"
-                required /><button
-                class="pin-toggle"
-                type="button"
-                data-pin-toggle="register-pin"
-                aria-label="Mostrar PIN"
-                aria-pressed="false"
-                title="Mostrar PIN"
-              >
-                <svg class="eye-icon eye-closed" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z" />
-                  <circle cx="12" cy="12" r="2.8" />
-                </svg>
-                <svg class="eye-icon eye-open" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.3 0 9.8 6 9.8 6a17.6 17.6 0 0 1-3.3 3.8M6.1 8.1A17.9 17.9 0 0 0 2.2 12S5.7 18 12 18c1.4 0 2.7-.3 3.8-.8"
-                  />
-                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-                </svg></button
-            ></label>
-            <button class="primary-button" type="submit">Continuar</button>
-          </form>
-          <form id="recovery-form" class="auth-form" hidden>
-            <p class="auth-copy">Informe seu telefone para receber um código no Telegram.</p>
-            <label
-              >Telefone
-              <span class="phone-input">
-                <span class="phone-prefix">+55</span>
-                <input
-                  name="telefone"
-                  type="tel"
-                  placeholder="(61) 99999-9999"
-                  inputmode="numeric"
-                  maxlength="15"
-                  autocomplete="tel"
-                  required
-                />
-              </span>
-            </label>
-            <button class="primary-button" type="submit">Continuar</button>
-            <button
-              class="text-button forgot-pin-button"
-              id="recovery-back-button"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
+          <label
+            >PIN de 4 números<input
+              name="pin"
+              id="login-pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="current-password"
+              required /><button
+              class="pin-toggle"
               type="button"
-              aria-label="Voltar para a tela de entrada"
+              data-pin-toggle="login-pin"
+              aria-label="Mostrar PIN"
+              aria-pressed="false"
+              title="Mostrar PIN"
             >
-              Voltar para entrar
+              <svg class="eye-icon eye-closed" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z" />
+                <circle cx="12" cy="12" r="2.8" />
+              </svg>
+              <svg class="eye-icon eye-open" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.3 0 9.8 6 9.8 6a17.6 17.6 0 0 1-3.3 3.8M6.1 8.1A17.9 17.9 0 0 0 2.2 12S5.7 18 12 18c1.4 0 2.7-.3 3.8-.8"
+                />
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              </svg></button
+          ></label>
+          <button class="text-button forgot-pin-button" id="forgot-pin-button" type="button">
+            Esqueci meu PIN
+          </button>
+          <button class="primary-button" type="submit">Entrar</button>
+        </form>
+        <form id="register-form" class="auth-form" hidden>
+          <label
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
+                inputmode="numeric"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
+          <label
+            >Crie um PIN de 4 números<input
+              name="pin"
+              id="register-pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required /><button
+              class="pin-toggle"
+              type="button"
+              data-pin-toggle="register-pin"
+              aria-label="Mostrar PIN"
+              aria-pressed="false"
+              title="Mostrar PIN"
+            >
+              <svg class="eye-icon eye-closed" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.2 12s3.5-6 9.8-6 9.8 6 9.8 6-3.5 6-9.8 6-9.8-6-9.8-6Z" />
+                <circle cx="12" cy="12" r="2.8" />
+              </svg>
+              <svg class="eye-icon eye-open" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.3 0 9.8 6 9.8 6a17.6 17.6 0 0 1-3.3 3.8M6.1 8.1A17.9 17.9 0 0 0 2.2 12S5.7 18 12 18c1.4 0 2.7-.3 3.8-.8"
+                />
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+              </svg></button
+          ></label>
+          <button class="primary-button" type="submit">Continuar</button>
+        </form>
+        <form id="recovery-form" class="auth-form" hidden>
+          <p class="auth-copy">Informe seu telefone para receber um código no Telegram.</p>
+          <label
+            >Telefone
+            <span class="phone-input">
+              <span class="phone-prefix">+55</span>
+              <input
+                name="telefone"
+                type="tel"
+                placeholder="(61) 99999-9999"
+                inputmode="numeric"
+                maxlength="15"
+                autocomplete="tel"
+                required
+              />
+            </span>
+          </label>
+          <button class="primary-button" type="submit">Continuar</button>
+          <button
+            class="text-button forgot-pin-button"
+            id="recovery-back-button"
+            type="button"
+            aria-label="Voltar para a tela de entrada"
+          >
+            Voltar para entrar
+          </button>
+        </form>
+        <form id="reset-pin-form" class="auth-form" hidden>
+          <p class="auth-copy">Crie um novo PIN de quatro números para acessar sua conta.</p>
+          <label
+            >Novo PIN de 4 números<input
+              name="pin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+          <label
+            >Confirme o novo PIN<input
+              name="confirmacaoPin"
+              type="password"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              maxlength="4"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+          <button class="primary-button" type="submit">Salvar novo PIN</button>
+        </form>
+        <div class="telegram-step" id="telegram-step" hidden>
+          <strong>Confirme com o código do Telegram</strong>
+          <p>
+            Abra o bot e inicie a conversa. Você receberá um código de 6 dígitos no chat, seja no
+            celular, desktop ou Telegram Web.
+          </p>
+          <a
+            id="telegram-link"
+            class="telegram-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Abrir Telegram</a
+          >
+          <form id="verification-form" class="auth-form">
+            <label
+              >Código de 6 dígitos<input
+                id="verification-code"
+                name="codigo"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                autocomplete="one-time-code"
+                required
+              />
+            </label>
+            <button id="verification-submit" class="primary-button" type="submit" disabled>
+              Confirmar código
             </button>
           </form>
-          <form id="reset-pin-form" class="auth-form" hidden>
-            <p class="auth-copy">Crie um novo PIN de quatro números para acessar sua conta.</p>
-            <label
-              >Novo PIN de 4 números<input
-                name="pin"
-                type="password"
-                inputmode="numeric"
-                pattern="[0-9]{4}"
-                maxlength="4"
-                autocomplete="new-password"
-                required
-              />
-            </label>
-            <label
-              >Confirme o novo PIN<input
-                name="confirmacaoPin"
-                type="password"
-                inputmode="numeric"
-                pattern="[0-9]{4}"
-                maxlength="4"
-                autocomplete="new-password"
-                required
-              />
-            </label>
-            <button class="primary-button" type="submit">Salvar novo PIN</button>
-          </form>
-          <div class="telegram-step" id="telegram-step" hidden>
-            <strong>Confirme com o código do Telegram</strong>
-            <p>
-              Abra o bot e inicie a conversa. Você receberá um código de 6 dígitos no chat, seja no
-              celular, desktop ou Telegram Web.
-            </p>
-            <a
-              id="telegram-link"
-              class="telegram-link"
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Abrir Telegram</a
-            >
-            <form id="verification-form" class="auth-form">
-              <label
-                >Código de 6 dígitos<input
-                  id="verification-code"
-                  name="codigo"
-                  type="text"
-                  inputmode="numeric"
-                  pattern="[0-9]{6}"
-                  maxlength="6"
-                  autocomplete="one-time-code"
-                  required
-                />
-              </label>
-              <button id="verification-submit" class="primary-button" type="submit" disabled>
-                Confirmar código
-              </button>
-            </form>
-          </div>
-          <p class="auth-message" id="auth-message" aria-live="polite"></p>
+        </div>
+        <p class="auth-message" id="auth-message" aria-live="polite"></p>
         </div>
       </div>
     </section>
