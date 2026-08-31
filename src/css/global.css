@@ -99,7 +99,7 @@ button {
   background: var(--card);
   box-shadow: 0 22px 60px #0c122214;
 }
-.auth-screen[data-loading] .auth-card > :not(.session-loading) {
+.auth-screen[data-loading] .auth-content {
   display: none;
 }
 .session-loading {
