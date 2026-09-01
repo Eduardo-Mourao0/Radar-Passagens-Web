@@ -1,11 +1,53 @@
 import { createRouteCard } from '../components/routeCard.js';
 import { validateRoute } from '../utils/validators.js';
 
+const PRICE_REFRESH_INTERVAL = 60 * 60 * 1000;
+const PRICE_REFRESH_STORAGE_KEY = 'radar-passagens:last-price-refresh';
+
 export function createRoutesFeature({ elements, routesApi, onBooking, onHistory, onAlert }) {
   const { form, formMessage, grid, count, apiStatus, checkPricesButton, deleteDialog, deleteForm } =
     elements;
   let pendingDeletion = null;
+  let priceRefreshTimer;
   const errorMessage = (error, fallback) => error?.message || fallback;
+
+  function formatRemainingTime(milliseconds) {
+    const totalSeconds = Math.ceil(milliseconds / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  function getPriceRefreshRemainingTime() {
+    const lastRefresh = Number(window.localStorage.getItem(PRICE_REFRESH_STORAGE_KEY));
+    const remainingTime = lastRefresh + PRICE_REFRESH_INTERVAL - Date.now();
+    if (!Number.isFinite(lastRefresh) || remainingTime <= 0) {
+      window.localStorage.removeItem(PRICE_REFRESH_STORAGE_KEY);
+      return 0;
+    }
+    return remainingTime;
+  }
+
+  function updatePriceRefreshButton() {
+    const remainingTime = getPriceRefreshRemainingTime();
+    if (!remainingTime) {
+      checkPricesButton.disabled = false;
+      checkPricesButton.textContent = 'Atualizar preços ↻';
+      checkPricesButton.removeAttribute('title');
+      window.clearInterval(priceRefreshTimer);
+      priceRefreshTimer = undefined;
+      return;
+    }
+
+    const remainingLabel = formatRemainingTime(remainingTime);
+    checkPricesButton.disabled = true;
+    checkPricesButton.textContent = `Atualizar em ${remainingLabel}`;
+    checkPricesButton.title = `Disponível novamente em ${remainingLabel}`;
+    if (!priceRefreshTimer) {
+      priceRefreshTimer = window.setInterval(updatePriceRefreshButton, 1000);
+    }
+  }
 
   function mensagemCotacaoInicial(situacaoCotacao, acao) {
     if (situacaoCotacao === 'ATUALIZADA') return `${acao} e cotação atualizada!`;
@@ -147,16 +189,21 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
 
   async function handlePriceRefresh(event) {
     const button = event.currentTarget;
+    if (getPriceRefreshRemainingTime()) {
+      updatePriceRefreshButton();
+      return;
+    }
+
     button.disabled = true;
     button.textContent = 'Atualizando\u2026';
     try {
       await routesApi.refreshPrices();
+      window.localStorage.setItem(PRICE_REFRESH_STORAGE_KEY, String(Date.now()));
       await loadRoutes();
     } catch (error) {
       window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel atualizar os pre\u00e7os.'));
     } finally {
-      button.disabled = false;
-      button.textContent = 'Atualizar pre\u00e7os \u21bb';
+      updatePriceRefreshButton();
     }
   }
 
@@ -168,6 +215,10 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       pendingDeletion = null;
     });
     checkPricesButton.addEventListener('click', handlePriceRefresh);
+    window.addEventListener('storage', (event) => {
+      if (event.key === PRICE_REFRESH_STORAGE_KEY) updatePriceRefreshButton();
+    });
+    updatePriceRefreshButton();
   }
 
   return { loadRoutes, setup };
