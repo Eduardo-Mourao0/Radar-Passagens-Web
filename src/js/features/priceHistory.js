@@ -1,6 +1,8 @@
 import { formatDateTime, formatMoney } from '../utils/formatters.js';
 import { escapeHtml } from '../utils/strings.js';
 
+const HISTORY_LIMIT = 10;
+
 export function createPriceHistoryFeature({ dialog, content, routesApi }) {
   dialog.querySelector('.close-button').addEventListener('click', () => dialog.close());
 
@@ -10,8 +12,11 @@ export function createPriceHistoryFeature({ dialog, content, routesApi }) {
 
     try {
       const history = await routesApi.history(id);
-      content.innerHTML = history.length
-        ? `<div class="history-list">${history
+      const recentHistory = [...history]
+        .sort((a, b) => new Date(b.coletadoEm) - new Date(a.coletadoEm))
+        .slice(0, HISTORY_LIMIT);
+      content.innerHTML = recentHistory.length
+        ? `<div class="history-list">${recentHistory
             .map(
               (item) =>
                 `<div class="history-row"><div><strong>${escapeHtml(formatMoney(item.preco, item.moeda))}</strong><p>${escapeHtml(item.companhia)}</p></div><time>${escapeHtml(formatDateTime(item.coletadoEm))}</time></div>`,

@@ -133,8 +133,6 @@ init().catch((error) => {
   console.error('Não foi possível iniciar a aplicação.', error);
   elements.appShell.hidden = true;
   elements.authScreen.hidden = false;
-  elements.authScreen.removeAttribute('data-loading');
-  elements.authScreen.removeAttribute('aria-busy');
   elements.authMessage.className = 'auth-message error';
   elements.authMessage.textContent = 'Não foi possível iniciar a aplicação. Recarregue a página.';
 });
