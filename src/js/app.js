@@ -131,6 +131,12 @@ async function init() {
 
 init().catch((error) => {
   console.error('Não foi possível iniciar a aplicação.', error);
+  document.documentElement.removeAttribute('data-authenticated');
+  try {
+    window.localStorage.removeItem('radar-passagens:authenticated');
+  } catch {
+    // The interface state was cleared before attempting to access storage.
+  }
   elements.appShell.hidden = true;
   elements.authScreen.hidden = false;
   elements.authMessage.className = 'auth-message error';

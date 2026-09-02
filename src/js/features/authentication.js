@@ -1,9 +1,24 @@
 import { configureSession } from '../api/apiClient.js';
 
+const AUTHENTICATED_SESSION_KEY = 'radar-passagens:authenticated';
+
 export function createAuthenticationFeature({ elements, authApi, onAuthenticated }) {
   let activeVerification;
   let resetToken;
   let recoveryPhone;
+
+  function setAuthenticatedSession(isAuthenticated) {
+    document.documentElement.toggleAttribute('data-authenticated', isAuthenticated);
+    try {
+      if (isAuthenticated) {
+        window.localStorage.setItem(AUTHENTICATED_SESSION_KEY, 'true');
+      } else {
+        window.localStorage.removeItem(AUTHENTICATED_SESSION_KEY);
+      }
+    } catch {
+      // The session remains valid when storage is unavailable.
+    }
+  }
 
   function showMessage(message, type = '') {
     elements.message.textContent = message;
@@ -64,12 +79,14 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   }
 
   function showAuthentication() {
+    setAuthenticatedSession(false);
     elements.appShell.hidden = true;
     elements.screen.hidden = false;
     showPanel('login');
   }
 
   function showApplication() {
+    setAuthenticatedSession(true);
     elements.screen.hidden = true;
     elements.appShell.hidden = false;
     onAuthenticated();
