@@ -64,16 +64,12 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
   }
 
   function showAuthentication() {
-    elements.screen.removeAttribute('data-loading');
-    elements.screen.removeAttribute('aria-busy');
     elements.appShell.hidden = true;
     elements.screen.hidden = false;
     showPanel('login');
   }
 
   function showApplication() {
-    elements.screen.removeAttribute('data-loading');
-    elements.screen.removeAttribute('aria-busy');
     elements.screen.hidden = true;
     elements.appShell.hidden = false;
     onAuthenticated();
