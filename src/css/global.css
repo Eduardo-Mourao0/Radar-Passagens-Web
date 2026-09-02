@@ -20,6 +20,12 @@ body {
 [hidden] {
   display: none !important;
 }
+html[data-authenticated] #auth-screen {
+  display: none;
+}
+html[data-authenticated] #app-shell[hidden] {
+  display: block !important;
+}
 button,
 input {
   font: inherit;
@@ -556,9 +562,30 @@ dialog::backdrop {
   font-size: 14px;
   margin: 13px 0 22px;
 }
+.history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 23px;
+}
+.history-filter {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.history-filter:hover,
+.history-filter.active {
+  border-color: var(--accent);
+  background: #f1654414;
+  color: var(--accent);
+}
 .history-list {
   display: grid;
-  margin-top: 23px;
+  margin-top: 16px;
 }
 .history-row {
   border-top: 1px solid var(--line);
