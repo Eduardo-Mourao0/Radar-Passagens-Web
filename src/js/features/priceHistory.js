@@ -23,7 +23,7 @@ export function createPriceHistoryFeature({ dialog, content, routesApi }) {
       return history.filter((item) => new Date(item.coletadoEm).getTime() >= cutoff);
     }
     if (activeFilter === 'all') return history;
-    return history.slice(0, LATEST_HISTORY_LIMIT);
+    throw new TypeError('Filtro de histórico inválido.');
   }
 
   function renderHistory(history, activeFilter) {
@@ -42,7 +42,11 @@ export function createPriceHistoryFeature({ dialog, content, routesApi }) {
               `<div class="history-row"><div><strong>${escapeHtml(formatMoney(item.preco, item.moeda))}</strong><p>${escapeHtml(item.companhia)}</p></div><time>${escapeHtml(formatDateTime(item.coletadoEm))}</time></div>`,
           )
           .join('')}</div>`
-      : '<p class="history-empty">Não há coletas neste período.</p>';
+      : `<p class="history-empty">${
+          selectedFilter === 'month'
+            ? 'Não há coletas nos últimos 30 dias.'
+            : 'Ainda não há preços coletados para esta rota.'
+        }</p>`;
 
     content.innerHTML = `<div class="history-filters" role="group" aria-label="Período do histórico">${filters}</div>${historyContent}`;
     content.querySelectorAll('[data-history-filter]').forEach((button) => {
