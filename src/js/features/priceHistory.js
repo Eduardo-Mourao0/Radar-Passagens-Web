@@ -12,21 +12,27 @@ const THIRTY_DAYS_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000;
 export function createPriceHistoryFeature({ dialog, content, routesApi }) {
   dialog.querySelector('.close-button').addEventListener('click', () => dialog.close());
 
+  function normalizeHistoryFilter(activeFilter) {
+    return Object.hasOwn(HISTORY_FILTERS, activeFilter) ? activeFilter : 'latest';
+  }
+
   function filterHistory(history, activeFilter) {
     if (activeFilter === 'latest') return history.slice(0, LATEST_HISTORY_LIMIT);
     if (activeFilter === 'month') {
       const cutoff = Date.now() - THIRTY_DAYS_IN_MILLISECONDS;
       return history.filter((item) => new Date(item.coletadoEm).getTime() >= cutoff);
     }
-    return history;
+    if (activeFilter === 'all') return history;
+    return history.slice(0, LATEST_HISTORY_LIMIT);
   }
 
   function renderHistory(history, activeFilter) {
-    const filteredHistory = filterHistory(history, activeFilter);
+    const selectedFilter = normalizeHistoryFilter(activeFilter);
+    const filteredHistory = filterHistory(history, selectedFilter);
     const filters = Object.entries(HISTORY_FILTERS)
       .map(
         ([filter, label]) =>
-          `<button class="history-filter ${filter === activeFilter ? 'active' : ''}" type="button" data-history-filter="${filter}" aria-pressed="${filter === activeFilter}">${label}</button>`,
+          `<button class="history-filter ${filter === selectedFilter ? 'active' : ''}" type="button" data-history-filter="${filter}" aria-pressed="${filter === selectedFilter}">${label}</button>`,
       )
       .join('');
     const historyContent = filteredHistory.length

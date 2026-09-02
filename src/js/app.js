@@ -135,7 +135,7 @@ init().catch((error) => {
   try {
     window.localStorage.removeItem('radar-passagens:authenticated');
   } catch {
-    document.documentElement.removeAttribute('data-authenticated');
+    // The interface state was cleared before attempting to access storage.
   }
   elements.appShell.hidden = true;
   elements.authScreen.hidden = false;

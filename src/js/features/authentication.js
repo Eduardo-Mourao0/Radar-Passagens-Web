@@ -16,7 +16,7 @@ export function createAuthenticationFeature({ elements, authApi, onAuthenticated
         window.localStorage.removeItem(AUTHENTICATED_SESSION_KEY);
       }
     } catch {
-      return;
+      // The session remains valid when storage is unavailable.
     }
   }
 
