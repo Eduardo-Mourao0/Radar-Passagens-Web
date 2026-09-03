@@ -3,6 +3,8 @@ import { validateRoute } from '../utils/validators.js';
 
 const PRICE_REFRESH_INTERVAL = 60 * 60 * 1000;
 const PRICE_REFRESH_STORAGE_KEY = 'radar-passagens:last-price-refresh';
+const INITIAL_QUOTE_POLL_INTERVAL = 5_000;
+const INITIAL_QUOTE_MAX_ATTEMPTS = 6;
 
 export function createRoutesFeature({ elements, routesApi, onBooking, onHistory, onAlert }) {
   const { form, formMessage, grid, count, apiStatus, checkPricesButton, deleteDialog, deleteForm } =
@@ -88,6 +90,32 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
     }
   }
 
+  function atualizarCotacaoInicialEmSegundoPlano(rotaId) {
+    let tentativasRestantes = INITIAL_QUOTE_MAX_ATTEMPTS;
+
+    const verificarCotacao = async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, INITIAL_QUOTE_POLL_INTERVAL));
+      try {
+        const routes = await routesApi.list();
+        const rota = routes.find((route) => route.id === rotaId);
+        if (!rota || rota.ultimoPreco) {
+          renderRoutes(routes);
+          if (rota?.ultimoPreco) {
+            formMessage.textContent = 'Rota cadastrada e cotação atualizada!';
+          }
+          return;
+        }
+      } catch {
+        return;
+      }
+
+      tentativasRestantes -= 1;
+      if (tentativasRestantes > 0) void verificarCotacao();
+    };
+
+    void verificarCotacao();
+  }
+
   async function handleRouteSubmit(event) {
     event.preventDefault();
     formMessage.textContent = '';
@@ -115,15 +143,9 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       form.reset();
       delete form.elements.origem.dataset.iata;
       delete form.elements.destino.dataset.iata;
-      let situacaoCotacao = rotaCriada.situacaoCotacao;
-      try {
-        const rotaComPreco = await routesApi.refreshPrice(rotaCriada.id);
-        situacaoCotacao = rotaComPreco.situacaoCotacao;
-      } catch {
-        // A rota já foi salva; o job agendado fará uma nova tentativa de cotação.
-      }
-      formMessage.textContent = mensagemCotacaoInicial(situacaoCotacao, 'Rota cadastrada');
+      formMessage.textContent = 'Rota cadastrada! Buscando a cotação em segundo plano.';
       await loadRoutes();
+      atualizarCotacaoInicialEmSegundoPlano(rotaCriada.id);
     } catch (error) {
       formMessage.textContent = error.message;
     } finally {
