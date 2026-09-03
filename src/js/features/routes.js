@@ -79,14 +79,8 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
     grid.innerHTML = '<div class="loading">Carregando suas rotas\u2026</div>';
     try {
       const routes = await routesApi.list();
-      const routesWithHistory = await Promise.all(
-        routes.map(async (route) => ({
-          ...route,
-          historicos: await routesApi.history(route.id).catch(() => []),
-        })),
-      );
       setApiStatus('online', 'API conectada');
-      renderRoutes(routesWithHistory);
+      renderRoutes(routes);
     } catch {
       setApiStatus('offline', 'API indispon\u00edvel');
       grid.innerHTML =
@@ -121,10 +115,14 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
       form.reset();
       delete form.elements.origem.dataset.iata;
       delete form.elements.destino.dataset.iata;
-      formMessage.textContent = mensagemCotacaoInicial(
-        rotaCriada.situacaoCotacao,
-        'Rota cadastrada',
-      );
+      let situacaoCotacao = rotaCriada.situacaoCotacao;
+      try {
+        const rotaComPreco = await routesApi.refreshPrice(rotaCriada.id);
+        situacaoCotacao = rotaComPreco.situacaoCotacao;
+      } catch {
+        // A rota já foi salva; o job agendado fará uma nova tentativa de cotação.
+      }
+      formMessage.textContent = mensagemCotacaoInicial(situacaoCotacao, 'Rota cadastrada');
       await loadRoutes();
     } catch (error) {
       formMessage.textContent = error.message;
@@ -154,13 +152,8 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
         ? routesApi.pause(id)
         : routesApi.activate(id));
       await loadRoutes();
-      if (
-        button.dataset.active !== 'true' &&
-        rotaAtualizada.situacaoCotacao !== 'ATUALIZADA'
-      ) {
-        window.alert(
-          mensagemCotacaoInicial(rotaAtualizada.situacaoCotacao, 'Rota reativada'),
-        );
+      if (button.dataset.active !== 'true' && rotaAtualizada.situacaoCotacao !== 'ATUALIZADA') {
+        window.alert(mensagemCotacaoInicial(rotaAtualizada.situacaoCotacao, 'Rota reativada'));
       }
     } catch (error) {
       window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel concluir esta a\u00e7\u00e3o.'));
@@ -197,9 +190,26 @@ export function createRoutesFeature({ elements, routesApi, onBooking, onHistory,
     button.disabled = true;
     button.textContent = 'Atualizando\u2026';
     try {
-      await routesApi.refreshPrices();
+      const routes = await routesApi.list();
+      const activeRoutes = routes.filter((route) => route.ativa);
+      if (!activeRoutes.length) {
+        window.alert('Não há rotas ativas para atualizar.');
+        return;
+      }
+      const results = await Promise.allSettled(
+        activeRoutes.map((route) => routesApi.refreshPrice(route.id)),
+      );
+      const failures = results.filter(
+        (result) => result.status === 'rejected' || result.value.situacaoCotacao === 'INDISPONIVEL',
+      ).length;
+      if (failures === activeRoutes.length) {
+        throw new Error('Não foi possível atualizar os preços das rotas ativas.');
+      }
       window.localStorage.setItem(PRICE_REFRESH_STORAGE_KEY, String(Date.now()));
       await loadRoutes();
+      if (failures > 0) {
+        window.alert(`${failures} rota(s) não puderam ser atualizadas agora.`);
+      }
     } catch (error) {
       window.alert(errorMessage(error, 'N\u00e3o foi poss\u00edvel atualizar os pre\u00e7os.'));
     } finally {

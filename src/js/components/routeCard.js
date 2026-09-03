@@ -3,7 +3,7 @@ import { escapeHtml } from '../utils/strings.js';
 import { getAirportCity } from '../data/airports.js';
 
 export function createRouteCard(route) {
-  const price = route.historicos?.[0];
+  const price = route.ultimoPreco ?? route.historicos?.[0];
   const dates = `${formatDate(route.dataIda)}${route.dataVolta ? ` \u2014 ${formatDate(route.dataVolta)}` : ' \u00b7 somente ida'}`;
   const fare = price ? formatMoney(price.preco, price.moeda) : 'Aguardando coleta';
   const alertLabel = route.alertaPreco

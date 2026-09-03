@@ -13,5 +13,5 @@ export const routesApi = {
       method: 'PUT',
       body: JSON.stringify({ precoAlvo: price }),
     }),
-  refreshPrices: () => apiClient('/rotas/verificar-precos', { method: 'POST' }),
+  refreshPrice: (id) => apiClient(`/rotas/${id}/verificar-preco`, { method: 'POST' }),
 };
